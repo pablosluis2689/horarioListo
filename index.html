@@ -326,22 +326,79 @@ const DIAS_FULL={lunes:'Lunes',martes:'Martes',miercoles:'Miércoles',jueves:'Ju
 const SUGERENCIAS=['Matemática','Lengua','Ciencias','Sociales','Inglés','Ed. Física','Arte','Música','Formación','Computación','Proyecto','Deporte','Tecnología'];
 let ultimoColor='#6366F1';
 function crearDataVacia(){return {materias:[],horario:{lunes:[],martes:[],miercoles:[],jueves:[],viernes:[]},extras:[],tareas:[],config:{horaMochila:'19:00'}};}
-let app=JSON.parse(localStorage.getItem('mochila_final_v3')||'null');
-if(!app){
-  let old=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
-  if(!old) old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
-  if(!old) old=JSON.parse(localStorage.getItem('mochila_v4')||'null');
-  if(old && old.hijos){app=old;}
-  else if(old && old.materias){app={hijos:[{id:Date.now(),nombre:'Hijo 1',data:old}],activo:0};}
-  else{app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};}
+
+//cambio de usuario pre creado
+let app=null; // 1. Crea la variable principal vacía. Aquí vivirá todo: Luis, sus materias, horario.
+
+try{ // 2. INTENTO: Todo lo que puede explotar si el dato viejo está roto va aquí adentro.
+
+  // 3. Intenta leer el dato más nuevo (v3). Si no existe, devuelve null.
+  app=JSON.parse(localStorage.getItem('mochila_final_v3')||'null');
+
+  if(!app){ // 4. Si no encontró v3, busca en versiones viejas
+    let old=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
+    if(!old) old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
+    if(!old) old=JSON.parse(localStorage.getItem('mochila_v4')||'null');
+
+    if(old && old.hijos){app=old;} // 5. Si lo viejo ya tenía hijos (Luis, Sofía), úsalo tal cual
+
+    // 6. Si lo viejo era el formato muy antiguo que solo tenía materias, conviértelo al formato nuevo con hijos
+    else if(old && old.materias){app={hijos:[{id:Date.now(),nombre:'Hijo 1',data:old}],activo:0};}
+
+    // 7. Si no hay NADA guardado, crea una app de cero con Sofía
+    else{app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};}
+  }
+
+}catch(e){
+  // 8. SI TODO LO DE ARRIBA FALLA (dato corrupto que no se puede leer con JSON.parse)
+  // Crea una app limpia y borra la memoria local para no quedar congelado
+  app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};
+  try{localStorage.clear();}catch(e2){}
 }
-function getData(){return app.hijos[app.activo].data;}
+
+// 9. FIX 1 - Si por algún bug hijos quedó vacío, crea a Luis
+if(!app.hijos ||!app.hijos.length){app.hijos=[{id:Date.now(),nombre:'Luis',data:crearDataVacia()}];}
+
+// 10. FIX 2 - ESTE ERA TU ERROR: Si activo era 1 o 2 pero solo hay 1 hijo (posición 0),
+// lo corrige a 0. Por eso se quedaba en "Preparando..."
+if(app.activo==null || app.activo>=app.hijos.length){app.activo=0;}
+
+// 11. FIX 3 - Revisa cada hijo y si le falta algo (horario, materias, config) se lo crea vacío
+// para que no explote cuando lo intentes usar
+app.hijos.forEach(function(h){
+  if(!h.data) h.data=crearDataVacia();
+  if(!h.data.horario) h.data.horario=crearDataVacia().horario;
+  if(!h.data.config) h.data.config={horaMochila:'19:00'};
+  if(!h.data.materias) h.data.materias=[];
+  if(!h.data.extras) h.data.extras=[];
+  if(!h.data.tareas) h.data.tareas=[];
+});
+
+// 12. Función que usan todas las demás para saber con qué hijo trabajar
+function getData(){
+  try{
+    if(!app.hijos[app.activo]) app.activo=0; // Si el activo no existe, vuelve a 0
+    return app.hijos[app.activo].data; // Devuelve los datos de Luis
+  }catch(e){
+    app.activo=0;
+    return app.hijos[0].data; // Si falla, devuelve el primer hijo igual
+  }
+}
+
+// 13. Función que guarda todo y refresca la pantalla
 function save(){
-  localStorage.setItem('mochila_final_v3',JSON.stringify(app));
-  localStorage.setItem('mochila_final_v2',JSON.stringify(app));
-  localStorage.setItem('mochila_multi_v1',JSON.stringify(app));
-  renderAll();
+  try{
+    // Guarda en 3 lugares por compatibilidad con tus versiones viejas
+    localStorage.setItem('mochila_final_v3',JSON.stringify(app));
+    localStorage.setItem('mochila_final_v2',JSON.stringify(app));
+    localStorage.setItem('mochila_multi_v1',JSON.stringify(app));
+  }catch(e){}
+  try{ renderAll(); }catch(e){} // Intenta redibujar, si falla no se congela
 }
+
+//fin de usuario pre creado
+
+
 function uid(){return Math.random().toString(36).slice(2,9);}
 function getDiaSemanaHoy(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];return mapa[new Date().getDay()];}
 function getDiaSemanaManana(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];return mapa[(new Date().getDay()+1)%7];}
@@ -363,6 +420,10 @@ function renderListaHijos(){
     cont.appendChild(div);
   });
 }
+
+
+
+
 function agregarHijo(){const inp=document.getElementById('inputNuevoHijo');const nombre=inp.value.trim();if(!nombre){alert('Escribe un nombre');return;}app.hijos.push({id:Date.now(),nombre:nombre,data:crearDataVacia()});app.activo=app.hijos.length-1;inp.value='';save();renderListaHijos();}
 function renombrarHijo(i){const nuevo=prompt('Nuevo nombre:',app.hijos[i].nombre);if(nuevo && nuevo.trim()){app.hijos[i].nombre=nuevo.trim();save();renderListaHijos();}}
 function borrarHijo(i){if(app.hijos.length===1){alert('Debe quedar al menos 1 hijo');return;}if(!confirm('¿Borrar a '+app.hijos[i].nombre+'?'))return;app.hijos.splice(i,1);if(app.activo>=app.hijos.length)app.activo=0;save();renderListaHijos();}
@@ -531,10 +592,46 @@ function importarDatos(e){
   reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result); if(data.hijos){if(confirm('¿Reemplazar todos los datos actuales?')){app=data;save();alert('Datos importados ✓');closeSheet('sheetSettings');}} else alert('Archivo inválido');}catch(err){alert('Error al leer el archivo');}};
   reader.readAsText(file);
 }
+
+
+//function renderAll(){
+  //renderHijos(); const data=getData(); document.getElementById('horaMochila').value=data.config.horaMochila;
+  //renderHero(); renderChecklist(); renderProximasTareas(); renderExtrasHoy(); renderDias(); renderExtras(); renderTareas(); renderSelectMaterias(); renderCalendarioSimple();
+//}
+
 function renderAll(){
-  renderHijos(); const data=getData(); document.getElementById('horaMochila').value=data.config.horaMochila;
-  renderHero(); renderChecklist(); renderProximasTareas(); renderExtrasHoy(); renderDias(); renderExtras(); renderTareas(); renderSelectMaterias(); renderCalendarioSimple();
+  try{ // INTENTO: Si algo falla adentro, no se congela la app en "Preparando..."
+
+    renderHijos(); // 1. Dibuja la lista de hijos arriba (Luis, Sofía, etc.)
+
+    const data=getData(); // 2. Agarra todos los datos del hijo activo (materias, horario, tareas)
+
+    // 3. Busca la cajita donde se pone la hora de la mochila
+    var hm=document.getElementById('horaMochila'); 
+    
+    // 4. Si esa cajita existe, le pone la hora guardada (ej: 19:00). 
+    // El if(hm) es para que no explote si no encuentra la cajita.
+    if(hm) hm.value=data.config.horaMochila;
+
+    // 5. De aquí para abajo redibuja TODA la pantalla con los datos nuevos
+    renderHero(); // El cartel grande de arriba "Hola Luis"
+    renderChecklist(); // La lista de lo que hay que meter mañana en la mochila
+    renderProximasTareas(); // Las 3 tareas más próximas
+    renderExtrasHoy(); // Actividades de hoy (fútbol, etc)
+    renderDias(); // Los 5 cuadros de Lunes a Viernes donde agregas materias
+    renderExtras(); // La lista completa de actividades extras
+    renderTareas(); // La lista completa de tareas
+    renderSelectMaterias(); // El desplegable de materias cuando creas una tarea
+    renderCalendarioSimple(); // El calendario chiquito
+
+  }catch(e){ 
+    // SI FALLA: No deja la pantalla en blanco/congelada
+    // Solo escribe el error en la consola para que lo veamos nosotros
+    console.error('renderAll fallo',e); 
+  }
 }
+
+
 if(Notification.permission!=='granted' && Notification.permission!=='denied'){setTimeout(()=>{if(confirm('¿Activar notificaciones para la mochila?'))pedirPermiso();},2500);}
 renderAll(); renderDiasChecks();
 </script>
