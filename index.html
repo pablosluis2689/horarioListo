@@ -523,41 +523,90 @@ function renderTareas(){
 function borrarTarea(id){if(!confirm('¿Eliminar tarea?'))return;const data=getData();data.tareas=data.tareas.filter(t=>t.id!==id);save();}
 function marcarHecha(id){const data=getData();const t=data.tareas.find(x=>x.id===id);if(t)t.estado='hecha';save();}
 
-function notificar(titulo,cuerpo){
-  // sonido y vibración aunque esté abierta
-  try{ new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a650f4.mp3').play().catch(()=>{}); }catch(e){}
+function getHoraActual(){const a=new Date();return a.getHours().toString().padStart(2,'0')+':'+a.getMinutes().toString().padStart(2,'0');}
+function getFechaHoy(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');}
+function restarMinutos(horaStr,minutos){if(!horaStr)return null;const parts=horaStr.split(':');let h=parseInt(parts[0]);let m=parseInt(parts[1]);let total=h*60+m-minutos;if(total<0)total+=1440;let nh=Math.floor(total/60);let nm=total%60;let sNh=nh.toString();if(sNh.length<2)sNh='0'+sNh;let sNm=nm.toString();if(sNm.length<2)sNm='0'+sNm;return sNh+':'+sNm;}
+function getMateriasMananaTexto(dataHijo, diaManana){try{if(!dataHijo||!dataHijo.horario)return 'Revisar mochila';const materias=dataHijo.horario[diaManana]||[];let lista=[];for(let mm of materias){let mat=null;if(dataHijo.materias){for(let x of dataHijo.materias){if(x.id===mm.materiaId){mat=x;break;}}}if(mat)lista.push(mat.nombre);}return lista.join(', ')||'Sin materias';}catch(e){return 'Revisar mochila';}}
+function notificar(titulo,cuerpo,clickHijoIndex){
+  try{ new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a650f4.mp3').play().catch(function(){}); }catch(e){}
   if(navigator.vibrate) navigator.vibrate([400,100,400]);
-
   if(Notification.permission==='granted' && 'serviceWorker' in navigator){
-    navigator.serviceWorker.ready.then(reg=>{
-      reg.showNotification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true});
-    });
+    navigator.serviceWorker.ready.then(function(reg){reg.showNotification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',badge:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true,tag:titulo+Date.now()});});
   }
 }
 function checkAlarmas(){
-  const data=getData(); const ahora=new Date(); const hhmm=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0'); const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado']; const hoy=diaMap[ahora.getDay()];
-  if(data.config.horaMochila===hhmm){
-    const manana=diaMap[(ahora.getDay()+1)%7]; const materias=data.horario[manana]||[]; const lista=materias.map(m=>{const mat=data.materias.find(x=>x.id===m.materiaId);return mat?mat.nombre:'';}).filter(x=>x).join(', '); const key='mochila_'+ahora.toDateString()+'_'+hhmm;
-    if(!localStorage.getItem(key)){notificar('🎒 Mochila de '+app.hijos[app.activo].nombre,'Mañana: '+(lista||'nada')+'. ¡Arma la mochila!'); localStorage.setItem(key,'1');}
-  }
-  data.extras.forEach(ex=>{
-    if(ex.dias.includes(hoy)){
-      const [h,m]=ex.horaInicio.split(':').map(Number); let minTotal=h*60+m-ex.anticipacionMinutos; if(minTotal<0)minTotal+=1440; const hh=Math.floor(minTotal/60).toString().padStart(2,'0'); const mm=(minTotal%60).toString().padStart(2,'0');
-      if(hh+':'+mm===hhmm){const k='extra_'+ex.id+'_'+ahora.toDateString()+'_'+hhmm; if(!localStorage.getItem(k)){notificar('⚽ '+ex.nombre+' de '+app.hijos[app.activo].nombre,'En '+ex.anticipacionMinutos+' min. Llevar: '+ex.nota); localStorage.setItem(k,'1');}}
+  if(!app ||!app.hijos ||!app.hijos.length) return;
+  const horaAhora = getHoraActual();
+  const fechaHoy = getFechaHoy();
+  const ahora = new Date();
+  const diaMap = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const hoy = diaMap[ahora.getDay()];
+  const manana = diaMap[(ahora.getDay()+1)%7];
+  const grupos = {};
+  for(let idx=0; idx<app.hijos.length; idx++){
+    let hijo=app.hijos[idx];
+    let dataHijo=null;
+    try{let raw=localStorage.getItem('mochila_'+hijo.id); dataHijo=raw? JSON.parse(raw):null;}catch(e){dataHijo=null;}
+    if(!dataHijo) continue;
+    if(!dataHijo.config) dataHijo.config={};
+    if(dataHijo.config.horaMochila && dataHijo.config.horaMochila===horaAhora){
+      let llave='mochila_'+horaAhora;
+      if(!grupos[llave]) grupos[llave]=[];
+      grupos[llave].push({tipo:'mochila',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:getMateriasMananaTexto(dataHijo,manana)});
     }
-  });
+    if(dataHijo.extras){
+      for(let ex of dataHijo.extras){
+        if(!ex.dias || ex.dias.indexOf(hoy)===-1) continue;
+        if(!ex.horaInicio) continue;
+        let aviso=restarMinutos(ex.horaInicio, ex.anticipacionMinutos||30);
+        if(aviso===horaAhora){
+          let llave='extra_'+horaAhora;
+          if(!grupos[llave]) grupos[llave]=[];
+          grupos[llave].push({tipo:'extra',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:(ex.nombre||'Actividad')+' a las '+ex.horaInicio+' - Llevar: '+(ex.nota||'')});
+        }
+      }
+    }
+    if(dataHijo.tareas){
+      for(let t of dataHijo.tareas){
+        if(t.fechaAviso===fechaHoy && t.horaAviso===horaAhora){
+          let llave='tarea_'+horaAhora;
+          if(!grupos[llave]) grupos[llave]=[];
+          grupos[llave].push({tipo:'tarea',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:(t.materia||'')+' '+(t.titulo||'')});
+        }
+      }
+    }
+  }
+  let llaves=Object.keys(grupos);
+  for(let k=0;k<llaves.length;k++){
+    let llave=llaves[k];
+    let items=grupos[llave];
+    if(!items||!items.length) continue;
+    let storageKey='notificado_grupo_'+llave+'_'+fechaHoy+'_'+horaAhora;
+    if(localStorage.getItem(storageKey)) continue;
+    if(items.length===1){
+      let it=items[0];
+      if(it.tipo==='mochila') notificar('🎒 Mochila de '+it.hijoNombre, 'Mañana ('+manana+'): '+(it.detalle||'nada')+'. ¡Arma la mochila!', it.hijoIndex);
+      else if(it.tipo==='extra') notificar('⚽ '+it.hijoNombre, it.detalle, it.hijoIndex);
+      else notificar('📚 Tarea de '+it.hijoNombre, it.detalle, it.hijoIndex);
+    }else{
+      let hora=llave.split('_')[1];
+      let titulo='', cuerpo='';
+      if(items[0].tipo==='mochila'){
+        titulo='🎒 Mochila '+hora+' - '+items.length+' hijos';
+        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+' mañana: '+i.detalle);} cuerpo=partes.join('\n');
+      }else if(items[0].tipo==='extra'){
+        titulo='⚽ Extras '+hora+' - '+items.length+' hijos';
+        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+': '+i.detalle);} cuerpo=partes.join('\n');
+      }else{
+        titulo='📚 Tareas '+hora;
+        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+': '+i.detalle);} cuerpo=partes.join('\n');
+      }
+      notificar(titulo, cuerpo, items[0].hijoIndex);
+    }
+    localStorage.setItem(storageKey,'1');
+  }
 }
 setInterval(checkAlarmas,30000);
-function simularAlarmaMochila(){const data=getData();const manana=getDiaSemanaManana();const hor=data.horario[manana]||[];let txt='Mañana ('+manana+') de '+app.hijos[app.activo].nombre+': '+(hor.length?hor.map(h=>{const m=data.materias.find(x=>x.id===h.materiaId);return (m?m.nombre:'')+(h.nota?' ('+h.nota+')':'');}).join(', '):'nada');alert('🔔 '+txt);}
-function simularAlarmaExtra(){const data=getData();if(!data.extras.length){alert('Crea un extra primero');return;}const e=data.extras[0];alert('⏰ '+app.hijos[app.activo].nombre+': En '+e.anticipacionMinutos+' min: '+e.nombre+'. Llevar: '+e.nota);}
-function pedirPermiso(){if(!('Notification' in window)){alert('Tu navegador no soporta notificaciones');return;}Notification.requestPermission().then(p=>{alert('Permiso: '+p); if(p==='granted')new Notification('🎒 ¡Notificaciones activas!','Recibirás avisos para la mochila');});}
-function borrarTodoHijo(){if(confirm('¿Borrar TODO de '+app.hijos[app.activo].nombre+'?')){app.hijos[app.activo].data=crearDataVacia();save();closeSheet('sheetSettings');}}
-function exportarDatos(){const blob=new Blob([JSON.stringify(app,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='mochila-lista-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);}
-function importarDatos(e){
-  const file=e.target.files[0]; if(!file)return; const reader=new FileReader();
-  reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result); if(data.hijos){if(confirm('¿Reemplazar todos los datos actuales?')){app=data;save();alert('Datos importados ✓');closeSheet('sheetSettings');}} else alert('Archivo inválido');}catch(err){alert('Error al leer el archivo');}};
-  reader.readAsText(file);
-}
 
 
 //function renderAll(){
@@ -572,9 +621,25 @@ function renderAll(){
   }catch(e){ console.error('renderAll fallo',e); }
 }
 
+function syncToSW(){
+  if(!navigator.serviceWorker.controller) return;
+  try{
+    const hijosParaSW = app.hijos.map(h=>{
+      const raw=localStorage.getItem('mochila_'+h.id);
+      const d=raw?JSON.parse(raw):{};
+      return {nombre:h.nombre, id:h.id, config:d.config||{}, extras:d.extras||[], tareas:d.tareas||[], horario:d.horario||{}, materias:d.materias||[]};
+    });
+    navigator.serviceWorker.controller.postMessage({type:'SYNC_HIJOS', hijos:hijosParaSW});
+    console.log('SW sync OK', hijosParaSW.length);
+  }catch(e){ console.log('SW sync fallo',e); }
+}
 
 if(Notification.permission!=='granted' && Notification.permission!=='denied'){setTimeout(()=>{if(confirm('¿Activar notificaciones para la mochila?'))pedirPermiso();},2500);}
 renderAll(); renderDiasChecks();
+setInterval(syncToSW, 60000);
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.ready.then(()=>{setTimeout(syncToSW,2000);});
+}
 </script>
 <!-- PWA PRO - HACE QUE SEA APP INSTALABLE -->
 <script>
