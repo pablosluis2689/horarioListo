@@ -2,221 +2,553 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Lista Final</title>
-<meta name="theme-color" content="#FF8A65">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mochila Lista</title>
+<meta name="theme-color" content="#6366F1">
+
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3456/3456426.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mochila Lista">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FFF8F0;--card:#fff;--accent:#FF8A65;--text:#4E342E;--muted:#8D6E63;--border:#FFE0B2}
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
-body{background:var(--bg);color:var(--text);padding-bottom:90px}
-header{background:#fff;padding:16px;text-align:center;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:11}
-.container{max-width:480px;margin:0 auto;padding:12px}
-.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--border)}
-.btn{background:#FF8A65;color:#fff;border:none;padding:12px 18px;border-radius:12px;font-weight:700;width:100%;font-size:15px;cursor:pointer}
-.btn-small{padding:8px 12px;width:auto;font-size:13px}
-.btn-outline{background:#fff;color:#FF8A65;border:2px solid #FF8A65}
-.input{width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;margin:6px 0;font-size:15px}
-.day-title{font-weight:800;font-size:16px;margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center}
-.materia-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;color:#fff;font-size:13px;margin:4px;font-weight:600}
+:root{
+  --bg:#F4F6FB;
+  --bg-grad:linear-gradient(180deg,#EEF1FB 0%,#F4F6FB 100%);
+  --card:rgba(255,255,255,0.75);
+  --card-solid:#fff;
+  --primary:#6366F1;
+  --primary-light:#E0E7FF;
+  --primary-dark:#4F46E5;
+  --success:#10B981;
+  --danger:#EF4444;
+  --warning:#F59E0B;
+  --text:#0F172A;
+  --text-muted:#64748B;
+  --text-soft:#94A3B8;
+  --border:rgba(15,23,42,0.06);
+  --border-strong:rgba(15,23,42,0.12);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.04);
+  --shadow-md:0 8px 24px rgba(15,23,42,0.08);
+  --shadow-lg:0 20px 50px rgba(99,102,241,0.15);
+  --radius:20px;
+  --radius-sm:14px;
+  --radius-pill:999px;
+}
+@media (prefers-color-scheme: dark) {
+  :root{
+    --bg:#0B1020;
+    --bg-grad:linear-gradient(180deg,#0B1020 0%,#111735 100%);
+    --card:rgba(30,35,60,0.7);
+    --card-solid:#1A2040;
+    --primary:#818CF8;
+    --primary-light:#312E81;
+    --primary-dark:#A5B4FC;
+    --text:#F1F5F9;
+    --text-muted:#94A3B8;
+    --text-soft:#64748B;
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.15);
+    --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md:0 8px 24px rgba(0,0,0,0.4);
+    --shadow-lg:0 20px 50px rgba(0,0,0,0.5);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg-grad);
+  color:var(--text);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  padding-bottom:110px;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.app-header{
+  position:sticky;top:0;z-index:50;
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 16px;
+}
+.header-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  max-width:520px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
+.brand-icon{
+  width:36px;height:36px;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(99,102,241,0.35);
+  color:white;font-size:18px;
+}
+.header-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:40px;height:40px;border-radius:12px;
+  background:var(--card-solid);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text);
+  transition:transform .15s ease, background .15s ease;
+}
+.icon-btn:active{transform:scale(0.92)}
+.hijo-selector{
+  background:var(--primary-light);color:var(--primary-dark);
+  border:none;padding:8px 14px;border-radius:999px;
+  font-weight:700;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.container{max-width:520px;margin:0 auto;padding:16px}
+.card{
+  background:var(--card);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:0 2px 8px rgba(15,23,42,0.04);
+}
+.card-title{font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.hero{
+  background:linear-gradient(135deg,var(--primary) 0%,#8B5CF6 100%);
+  color:white;border:none;
+  padding:22px;border-radius:20px;
+  box-shadow:0 20px 50px rgba(99,102,241,0.15);
+  position:relative;overflow:hidden;
+  margin-bottom:16px;
+}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.12);}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.hero > *{position:relative;z-index:1}
+.hero-greet{font-size:13px;opacity:.85;font-weight:500;margin-bottom:4px}
+.hero-title{font-size:22px;font-weight:800;line-height:1.2;margin-bottom:14px}
+.hero-sub{font-size:13px;opacity:.9;margin-bottom:14px;line-height:1.5}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+.hero-chip{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.checklist{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;}
+.check-item.done{opacity:.5}
+.check-item.done .check-label{text-decoration:line-through}
+.check-box{width:24px;height:24px;border-radius:8px;border:2px solid var(--border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:transparent;}
+.check-item.done .check-box{background:#10B981;border-color:#10B981;color:white;}
+.materia-tag{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;color:white;font-size:13px;font-weight:600;margin:3px;}
+.materia-tag .x{background:rgba(0,0,0,0.25);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px;}
+.day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.day-name{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+.day-badge{background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
+.input-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.input{flex:1;padding:12px 14px;background:var(--card-solid);border:1px solid var(--border);border-radius:14px;font-size:14px;color:var(--text);font-family:inherit;}
+.input:focus{outline:none;border-color:var(--primary)}
+.input-color{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);padding:3px;cursor:pointer;background:var(--card-solid);}
 .sug{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.sug span{background:#FFF3E0;border:1px solid var(--border);padding:6px 10px;border-radius:20px;font-size:12px;cursor:pointer}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0;z-index:20}
-.nav button{background:none;border:none;font-size:18px;padding:6px 8px;cursor:pointer;opacity:.4}
-.nav button.active{opacity:1;transform:scale(1.1)}
-.nav button small{display:block;font-size:8px;font-weight:700}
-.badge{background:#FFCCBC;padding:2px 8px;border-radius:10px;font-size:10px;margin-left:6px}
-.flex{display:flex;gap:8px;align-items:center}
+.sug span{background:var(--primary-light);color:var(--primary-dark);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;}
+.nota{font-size:12px;color:var(--text-muted);background:var(--primary-light);padding:8px 12px;border-radius:10px;margin-top:6px;display:flex;align-items:center;gap:6px;}
+.btn{background:var(--primary);color:white;border:none;padding:13px 20px;border-radius:14px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.btn-full{width:100%}.btn-ghost{background:var(--card-solid);color:var(--text);border:1px solid var(--border)}.btn-danger{background:#EF4444}.btn-success{background:#10B981}.btn-sm{padding:9px 14px;font-size:13px;border-radius:10px}.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:999px;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,0.08);display:flex;gap:4px;z-index:40;max-width:calc(100% - 24px);}
+.nav button{background:transparent;border:none;padding:10px 14px;border-radius:999px;color:var(--text-muted);font-weight:600;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;}
+.nav button.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+.modal-backdrop.show{opacity:1;pointer-events:auto}
+.bottom-sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card-solid);border-radius:24px 24px 0 0;padding:20px 20px 30px;z-index:101;transform:translateY(100%);transition:transform .3s ease;max-height:85vh;overflow-y:auto;}
+.bottom-sheet.show{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border-strong);margin:0 auto 16px;}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:16px}
+.cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.cal-col{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px;min-height:140px;}
+.cal-col h4{font-size:11px;font-weight:800;text-align:center;margin-bottom:8px;color:var(--text-muted);text-transform:uppercase;}
+.cal-item{border-radius:10px;padding:8px 6px;margin-bottom:6px;color:white;font-size:11px;font-weight:700;text-align:center;word-break:break-word;}
+.hijo-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;}
+.hijo-item.active{border-color:var(--primary);background:var(--primary-light)}
+.hijo-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#8B5CF6);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;}
+.hijo-info{flex:1;min-width:0}.hijo-name{font-weight:700;font-size:14px}.hijo-meta{font-size:11px;color:var(--text-muted)}.hijo-actions{display:flex;gap:4px}
+.label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin:10px 0 4px;}
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px;margin-bottom:10px;}
+.item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}.item-title{font-weight:700;font-size:15px}.item-meta{font-size:12px;color:var(--text-muted);margin-bottom:6px}
+.item-note{font-size:12px;color:var(--text-muted);background:var(--primary-light);padding:8px 12px;border-radius:10px;margin-top:8px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:var(--primary-light);color:var(--primary-dark);}
+.chip.success{background:rgba(16,185,129,0.15);color:#10B981}.chip.danger{background:rgba(239,68,68,0.15);color:#EF4444}
+.dias-checks{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.dias-checks label{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.empty{text-align:center;padding:30px 20px;color:var(--text-soft);}.empty-emoji{font-size:40px;margin-bottom:8px}.empty-text{font-size:13px}
 .hidden{display:none!important}
-.nota{font-size:12px;color:var(--muted);background:#FFF8E1;padding:4px 8px;border-radius:8px;margin-top:4px}
-.hijo-btn{padding:8px 14px;border-radius:20px;border:2px solid var(--border);font-weight:800;font-size:13px;cursor:pointer;background:#fff}
-.hijo-btn.active{background:#4E342E;color:#fff;border-color:#4E342E}
-.cal-simple{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.cal-simple::-webkit-scrollbar{display:none}
-.cal-col{flex:0 0 115px;background:#fff;border-radius:14px;padding:8px;border:1px solid var(--border);min-height:140px;scroll-snap-align:start}
-@media(min-width:480px){.cal-simple{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible}.cal-col{flex:1}}
-.cal-col h4{font-size:12px;font-weight:800;text-align:center;margin-bottom:8px}
-.cal-item{border-radius:10px;padding:6px 8px;margin-bottom:6px;color:#fff;font-size:11px;font-weight:700;text-align:center}
 </style>
 </head>
 <body>
-<header>
-<h1>🎒 Mochila Lista</h1>
-<p style="font-size:12px;color:#8D6E63">Un horario por hijo - simple</p>
-<div style="margin-top:12px">
-<div id="hijosContainer" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
-<div class="flex" style="max-width:340px;margin:10px auto 0"><input id="inputNuevoHijo" class="input" placeholder="Nombre hijo Ej: Sofia" style="margin:0"><button class="btn btn-small" onclick="agregarHijo()">+ Agregar</button></div>
-<div id="editHijoBox" class="hidden" style="max-width:340px;margin:8px auto 0;background:#FFF3E0;padding:8px;border-radius:12px"><div class="flex"><input id="inputEditHijo" class="input" style="margin:0"><button class="btn btn-small" onclick="confirmarRenombrar()">Guardar</button><button class="btn btn-small btn-outline" onclick="cancelarRenombrar()">X</button></div></div>
-<div class="flex" style="justify-content:center;margin-top:8px;gap:12px"><button style="background:none;border:none;color:#8D6E63;font-size:12px;font-weight:700" onclick="renombrarHijo()">✏️ Renombrar</button><button style="background:none;border:none;color:#E57373;font-size:12px;font-weight:700" onclick="borrarHijo()">🗑️ Borrar hijo</button></div>
-</div>
+<header class="app-header">
+  <div class="header-row">
+    <div class="brand"><div class="brand-icon">🎒</div><div>Mochila Lista</div></div>
+    <div class="header-actions">
+      <button class="hijo-selector" id="hijoSelector" onclick="openHijosModal()"><span id="hijoActualNombre">Hijo</span> ▼</button>
+      <button class="icon-btn" onclick="openSettings()">⚙️</button>
+    </div>
+  </div>
 </header>
 <div class="container">
-<div id="view-colegio"><div class="card"><strong>🔔 Alarma de <span id="nombreActivo1"></span>:</strong> <span id="horaMochilaLabel"></span><div class="flex" style="margin-top:8px"><input type="time" id="horaMochila" class="input" style="flex:1" value="19:00"><button class="btn btn-small" onclick="guardarHora()">Guardar</button></div><button class="btn btn-outline" style="margin-top:10px" onclick="switchView('calendario')">📅 Ver calendario simple</button></div><div id="diasContainer"></div></div>
-<div id="view-calendario" class="hidden"><div class="card"><h3>📅 Horario de <span class="nombreActivo"></span></h3><p style="font-size:11px;color:var(--muted)">Vista general sin horas - v1 gratis</p><button class="btn" style="margin-top:10px" onclick="window.print()">🖨️ Imprimir</button></div><div class="card"><div id="calendarioSimple" class="cal-simple"></div></div><div class="card"><button class="btn btn-outline" onclick="switchView('colegio')">← Volver</button></div></div>
-<div id="view-extras" class="hidden"><div class="card"><h3>⚽ Extras de <span class="nombreActivo"></span></h3><button class="btn" style="margin-top:10px" onclick="showFormExtra()">+ Nueva Actividad</button><div id="formExtra" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px"><input id="extraNombre" class="input" placeholder="Nombre ej: Futbol"><input id="extraNota" class="input" placeholder="¿Que llevar?"><label class="label">Hora inicio</label><input id="extraHora" type="time" class="input" value="16:30"><label class="label">Dias</label><div id="extraDias" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0"></div><label class="label">Avisar</label><select id="extraAnt" class="input"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>1 hora</option><option value="120">2 horas</option></select><div class="flex"><button class="btn btn-small" onclick="guardarExtra()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormExtra()">Cancelar</button></div></div></div><div id="listaExtras"></div></div>
-<div id="view-pendientes" class="hidden"><div class="card"><h3>📝 Tareas de <span class="nombreActivo"></span></h3><button class="btn" style="margin-top:10px" onclick="showFormTarea()">+ Nueva Tarea</button><div id="formTarea" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px"><input id="tareaTitulo" class="input" placeholder="Titulo"><select id="tareaMateria" class="input"></select><input id="tareaFecha" type="date" class="input"><input id="tareaNota" class="input" placeholder="Nota"><label class="label">Cuando avisar?</label><select id="tareaAviso" class="input"><option value="0_07:00">Mismo dia 7am</option><option value="1_19:00" selected>1 dia antes 7pm</option><option value="2_19:00">2 dias antes</option><option value="7_19:00">1 semana antes</option></select><div class="flex"><button class="btn btn-small" onclick="guardarTarea()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormTarea()">Cancelar</button></div></div></div><div id="listaTareas"></div></div>
-<div id="view-demo" class="hidden"><div class="card"><h3>🔔 Alarmas de <span class="nombreActivo"></span></h3><button class="btn" onclick="simularAlarmaMochila()">Probar Mochila</button><button class="btn" style="margin-top:8px;background:#8D6E63" onclick="simularAlarmaExtra()">Probar Extra</button><button class="btn" style="margin-top:8px;background:#4CAF50" onclick="pedirPermiso()">Activar Notificaciones</button><div id="logAlarmas" style="margin-top:12px;font-size:12px;background:#FFF3E0;padding:10px;border-radius:10px"></div></div><div class="card"><button class="btn btn-outline" onclick="borrarTodoHijo()">Borrar datos de este hijo</button></div></div>
+  <div id="view-hoy">
+    <div class="hero">
+      <div class="hero-greet" id="heroGreet">¡Hola!</div>
+      <div class="hero-title" id="heroTitle">Preparando la mochila...</div>
+      <div class="hero-sub" id="heroSub"></div>
+      <div class="hero-chips" id="heroChips"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="dot"></span> Checklist de mañana</div><div id="checklistContainer"></div></div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:#F59E0B"></span> Próximas tareas</div><div id="proximasTareas"></div></div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:#10B981"></span> Extras de hoy</div><div id="extrasHoy"></div></div>
+  </div>
+  <div id="view-colegio" class="hidden">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> Alarma de mochila</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Te avisaremos a esta hora</div>
+      <div class="input-row"><input type="time" id="horaMochila" class="input" value="19:00"><button class="btn btn-sm" onclick="guardarHora()">Guardar</button></div>
+    </div>
+    <div id="diasContainer"></div>
+  </div>
+  <div id="view-calendario" class="hidden">
+    <div class="card"><div class="card-title"><span class="dot"></span> Vista semanal</div><button class="btn btn-ghost btn-full" onclick="window.print()">🖨️ Imprimir horario</button></div>
+    <div class="card"><div id="calendarioSimple" class="cal-grid"></div></div>
+  </div>
+  <div id="view-extras" class="hidden">
+    <div class="card"><div class="card-title"><span class="dot" style="background:#10B981"></span> Actividades extras</div><button class="btn btn-full" onclick="openExtraSheet()">+ Nueva actividad</button></div>
+    <div id="listaExtras"></div>
+  </div>
+  <div id="view-tareas" class="hidden">
+    <div class="card"><div class="card-title"><span class="dot" style="background:#F59E0B"></span> Tareas pendientes</div><button class="btn btn-full" onclick="openTareaSheet()">+ Nueva tarea</button></div>
+    <div id="listaTareas"></div>
+  </div>
 </div>
-<div class="nav"><button id="btn-colegio" class="active" onclick="switchView('colegio')">📚<small>COLEGIO</small></button><button id="btn-calendario" onclick="switchView('calendario')">📅<small>CALEND</small></button><button id="btn-extras" onclick="switchView('extras')">⚽<small>EXTRAS</small></button><button id="btn-pendientes" onclick="switchView('pendientes')">📝<small>TAREAS</small></button><button id="btn-demo" onclick="switchView('demo')">🔔<small>ALARMAS</small></button></div>
+<nav class="nav">
+  <button id="btn-hoy" class="active" onclick="switchView('hoy')">📅<br>Hoy</button>
+  <button id="btn-colegio" onclick="switchView('colegio')">📚<br>Colegio</button>
+  <button id="btn-calendario" onclick="switchView('calendario')">🗓️<br>Semana</button>
+  <button id="btn-extras" onclick="switchView('extras')">⚽<br>Extras</button>
+  <button id="btn-tareas" onclick="switchView('tareas')">✅<br>Tareas</button>
+</nav>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeAllModals()"></div>
+
+<div class="bottom-sheet" id="sheetHijos">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Mis hijos</div>
+  <div id="listaHijos"></div>
+  <div style="margin-top:12px">
+    <div class="input-row">
+      <input id="inputNuevoHijo" class="input" placeholder="Nombre del nuevo hijo">
+      <button class="btn btn-sm" onclick="agregarHijo()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-sheet" id="sheetExtra">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Nueva actividad extra</div>
+  <label class="label">Nombre</label>
+  <input id="extraNombre" class="input" placeholder="Ej: Fútbol, Piano...">
+  <label class="label">¿Qué llevar?</label>
+  <input id="extraNota" class="input" placeholder="Ej: Zapatillas, botella...">
+  <label class="label">Hora de inicio</label>
+  <input id="extraHora" type="time" class="input" value="16:30">
+  <label class="label">Días</label>
+  <div id="extraDias" class="dias-checks"></div>
+  <label class="label">Avisar con anticipación</label>
+  <select id="extraAnt" class="input">
+    <option value="15">15 minutos</option>
+    <option value="30">30 minutos</option>
+    <option value="60" selected>1 hora</option>
+    <option value="120">2 horas</option>
+  </select>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheetExtra')">Cancelar</button>
+    <button class="btn" style="flex:1" onclick="guardarExtra()">Guardar</button>
+  </div>
+</div>
+
+<div class="bottom-sheet" id="sheetTarea">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Nueva tarea</div>
+  <label class="label">Título</label>
+  <input id="tareaTitulo" class="input" placeholder="Ej: Trabajo de Ciencias">
+  <label class="label">Materia</label>
+  <select id="tareaMateria" class="input"></select>
+  <label class="label">Fecha de entrega</label>
+  <input id="tareaFecha" type="date" class="input">
+  <label class="label">Nota</label>
+  <input id="tareaNota" class="input" placeholder="Detalles opcionales">
+  <label class="label">¿Cuándo avisar?</label>
+  <select id="tareaAviso" class="input">
+    <option value="0_07:00">Mismo día a las 7am</option>
+    <option value="1_19:00" selected>1 día antes a las 7pm</option>
+    <option value="2_19:00">2 días antes</option>
+    <option value="7_19:00">1 semana antes</option>
+  </select>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-ghost" style="flex:1" onclick="closeSheet('sheetTarea')">Cancelar</button>
+    <button class="btn" style="flex:1" onclick="guardarTarea()">Guardar</button>
+  </div>
+</div>
+
+<div class="bottom-sheet" id="sheetSettings">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Ajustes</div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title"><span class="dot"></span> Alarmas</div>
+    <button class="btn btn-ghost btn-full" onclick="pedirPermiso()">🔔 Activar notificaciones</button>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn btn-sm btn-ghost" style="flex:1" onclick="simularAlarmaMochila()">Probar mochila</button>
+      <button class="btn btn-sm btn-ghost" style="flex:1" onclick="simularAlarmaExtra()">Probar extra</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title"><span class="dot" style="background:#10B981"></span> Respaldo</div>
+    <div class="btn-row">
+      <button class="btn btn-sm btn-ghost" style="flex:1" onclick="exportarDatos()">📤 Exportar</button>
+      <button class="btn btn-sm btn-ghost" style="flex:1" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+    </div>
+  </div>
+  <div class="card"><button class="btn btn-danger btn-full btn-sm" onclick="borrarTodoHijo()">Borrar datos de este hijo</button></div>
+  <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="closeSheet('sheetSettings')">Cerrar</button>
+</div>
+
 <script>
 const DIAS=['lunes','martes','miercoles','jueves','viernes'];
-const DIAS_LABEL={lunes:'Lunes',martes:'Martes',miercoles:'Miercoles',jueves:'Jueves',viernes:'Viernes',sabado:'Sabado',domingo:'Domingo'};
-const SUGERENCIAS=['Matematica','Lengua','Ciencias','Sociales','Ingles','Educacion Fisica','Arte','Musica','Formacion','Computacion','Proyecto','Deporte'];
-let ultimoColor='#FF8A65';
+const DIAS_LABEL={lunes:'Lun',martes:'Mar',miercoles:'Mié',jueves:'Jue',viernes:'Vie',sabado:'Sáb',domingo:'Dom'};
+const DIAS_FULL={lunes:'Lunes',martes:'Martes',miercoles:'Miércoles',jueves:'Jueves',viernes:'Viernes',sabado:'Sábado',domingo:'Domingo'};
+const SUGERENCIAS=['Matemática','Lengua','Ciencias','Sociales','Inglés','Ed. Física','Arte','Música','Formación','Computación','Proyecto','Deporte','Tecnología'];
+let ultimoColor='#6366F1';
 function crearDataVacia(){return {materias:[],horario:{lunes:[],martes:[],miercoles:[],jueves:[],viernes:[]},extras:[],tareas:[],config:{horaMochila:'19:00'}};}
-let app=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
+let app=JSON.parse(localStorage.getItem('mochila_final_v3')||'null');
 if(!app){
-  let old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
+  let old=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
+  if(!old) old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
   if(!old) old=JSON.parse(localStorage.getItem('mochila_v4')||'null');
   if(old && old.hijos){app=old;}
   else if(old && old.materias){app={hijos:[{id:Date.now(),nombre:'Hijo 1',data:old}],activo:0};}
-  else{app={hijos:[{id:Date.now(),nombre:'Sofia',data:crearDataVacia()}],activo:0};}
+  else{app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};}
 }
 function getData(){return app.hijos[app.activo].data;}
-function save(){localStorage.setItem('mochila_final_v2',JSON.stringify(app));localStorage.setItem('mochila_multi_v1',JSON.stringify(app));renderAll();}
-function uid(){return Math.random().toString(36).slice(2,9);}
-function renderHijos(){
-  const cont=document.getElementById('hijosContainer');cont.innerHTML='';
-  app.hijos.forEach((h,i)=>{
-    const b=document.createElement('button');
-    b.className='hijo-btn'+(i===app.activo?' active':'');
-    b.textContent=h.nombre;
-    b.onclick=function(){app.activo=i;save();};
-    cont.appendChild(b);
-  });
-  const n=app.hijos[app.activo]? app.hijos[app.activo].nombre : '';
-  document.getElementById('nombreActivo1').textContent=n;
-  document.querySelectorAll('.nombreActivo').forEach(function(e){e.textContent=n;});
+function save(){
+  localStorage.setItem('mochila_final_v3',JSON.stringify(app));
+  localStorage.setItem('mochila_final_v2',JSON.stringify(app));
+  localStorage.setItem('mochila_multi_v1',JSON.stringify(app));
+  renderAll();
 }
-function agregarHijo(){const inp=document.getElementById('inputNuevoHijo');const nombre=inp.value.trim();if(!nombre){alert('Escribe el nombre');return;}app.hijos.push({id:Date.now(),nombre:nombre,data:crearDataVacia()});app.activo=app.hijos.length-1;inp.value='';save();}
-function renombrarHijo(){document.getElementById('editHijoBox').classList.remove('hidden');document.getElementById('inputEditHijo').value=app.hijos[app.activo].nombre;document.getElementById('inputEditHijo').focus();}
-function confirmarRenombrar(){const nuevo=document.getElementById('inputEditHijo').value.trim();if(nuevo){app.hijos[app.activo].nombre=nuevo;save();}cancelarRenombrar();}
-function cancelarRenombrar(){document.getElementById('editHijoBox').classList.add('hidden');}
-function borrarHijo(){if(app.hijos.length===1){alert('Debe quedar al menos 1 hijo');return;}if(!confirm('Borrar a '+app.hijos[app.activo].nombre+'?'))return;app.hijos.splice(app.activo,1);app.activo=0;save();}
-function renderAll(){renderHijos();const data=getData();document.getElementById('horaMochila').value=data.config.horaMochila;document.getElementById('horaMochilaLabel').innerText=data.config.horaMochila;renderDias();renderExtras();renderTareas();renderSelectMaterias();renderCalendarioSimple();}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function getDiaSemanaHoy(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];return mapa[new Date().getDay()];}
+function getDiaSemanaManana(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];return mapa[(new Date().getDay()+1)%7];}
+function renderHijos(){
+  const nombre=app.hijos[app.activo]?app.hijos[app.activo].nombre:'';
+  document.getElementById('hijoActualNombre').textContent=nombre;
+}
+function openHijosModal(){renderListaHijos();openSheet('sheetHijos');}
+function renderListaHijos(){
+  const cont=document.getElementById('listaHijos');cont.innerHTML='';
+  app.hijos.forEach((h,i)=>{
+    const div=document.createElement('div');
+    div.className='hijo-item'+(i===app.activo?' active':'');
+    const inicial=h.nombre.charAt(0).toUpperCase();
+    const numMaterias=h.data.materias.length;
+    const numTareas=h.data.tareas.filter(t=>t.estado==='pendiente').length;
+    div.innerHTML=`<div class="hijo-avatar">${inicial}</div><div class="hijo-info"><div class="hijo-name">${h.nombre}</div><div class="hijo-meta">${numMaterias} materias · ${numTareas} tareas</div></div><div class="hijo-actions"><button class="icon-btn" style="width:32px;height:32px" onclick="renombrarHijo(${i})">✏️</button><button class="icon-btn" style="width:32px;height:32px;color:#EF4444" onclick="borrarHijo(${i})">🗑️</button></div>`;
+    div.onclick=(e)=>{if(e.target.closest('.hijo-actions'))return;app.activo=i;save();closeSheet('sheetHijos');};
+    cont.appendChild(div);
+  });
+}
+function agregarHijo(){const inp=document.getElementById('inputNuevoHijo');const nombre=inp.value.trim();if(!nombre){alert('Escribe un nombre');return;}app.hijos.push({id:Date.now(),nombre:nombre,data:crearDataVacia()});app.activo=app.hijos.length-1;inp.value='';save();renderListaHijos();}
+function renombrarHijo(i){const nuevo=prompt('Nuevo nombre:',app.hijos[i].nombre);if(nuevo && nuevo.trim()){app.hijos[i].nombre=nuevo.trim();save();renderListaHijos();}}
+function borrarHijo(i){if(app.hijos.length===1){alert('Debe quedar al menos 1 hijo');return;}if(!confirm('¿Borrar a '+app.hijos[i].nombre+'?'))return;app.hijos.splice(i,1);if(app.activo>=app.hijos.length)app.activo=0;save();renderListaHijos();}
+function switchView(v){['hoy','colegio','calendario','extras','tareas'].forEach(x=>{document.getElementById('view-'+x).classList.add('hidden');document.getElementById('btn-'+x).classList.remove('active');});document.getElementById('view-'+v).classList.remove('hidden');document.getElementById('btn-'+v).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function openSheet(id){document.getElementById('modalBackdrop').classList.add('show');document.getElementById(id).classList.add('show');}
+function closeSheet(id){document.getElementById('modalBackdrop').classList.remove('show');document.getElementById(id).classList.remove('show');}
+function closeAllModals(){document.getElementById('modalBackdrop').classList.remove('show');document.querySelectorAll('.bottom-sheet').forEach(s=>s.classList.remove('show'));}
+function openSettings(){openSheet('sheetSettings');}
+function openExtraSheet(){document.getElementById('extraNombre').value='';document.getElementById('extraNota').value='';document.getElementById('extraHora').value='16:30';renderDiasChecks();openSheet('sheetExtra');}
+function openTareaSheet(){document.getElementById('tareaTitulo').value='';document.getElementById('tareaNota').value='';const hoy=new Date();document.getElementById('tareaFecha').value=hoy.toISOString().slice(0,10);renderSelectMaterias();openSheet('sheetTarea');}
+
+function renderHero(){
+  const data=getData();
+  const nombre=app.hijos[app.activo].nombre;
+  const hoy=getDiaSemanaHoy();
+  const manana=getDiaSemanaManana();
+  const hour=new Date().getHours();
+  let saludo='¡Buen día!'; if(hour>=12 && hour<19)saludo='¡Buenas tardes!'; else if(hour>=19)saludo='¡Buenas noches!';
+  document.getElementById('heroGreet').textContent=saludo;
+  document.getElementById('heroTitle').textContent=`${nombre}, mañana es ${DIAS_FULL[manana]||manana}`;
+  const materiasManana=data.horario[manana]||[];
+  const extrasHoy=data.extras.filter(e=>e.dias.includes(hoy));
+  const tareasPend=data.tareas.filter(t=>t.estado==='pendiente').length;
+  let sub=''; if(materiasManana.length){sub=`Tienes ${materiasManana.length} materias mañana`; if(extrasHoy.length)sub+=` y ${extrasHoy.length} extras hoy`; if(tareasPend)sub+=`. ${tareasPend} tareas pendientes`;} else {sub='No hay materias mañana 🎉';}
+  document.getElementById('heroSub').textContent=sub;
+  const chips=document.getElementById('heroChips'); chips.innerHTML='';
+  if(data.config.horaMochila){const c=document.createElement('div');c.className='hero-chip';c.innerHTML=`⏰ Alarma a las ${data.config.horaMochila}`;chips.appendChild(c);}
+  if(materiasManana.length){const c=document.createElement('div');c.className='hero-chip';c.innerHTML=`📚 ${materiasManana.length} materias`;chips.appendChild(c);}
+}
+function renderChecklist(){
+  const data=getData(); const manana=getDiaSemanaManana(); const materiasManana=data.horario[manana]||[];
+  const cont=document.getElementById('checklistContainer'); cont.innerHTML='';
+  if(!materiasManana.length){cont.innerHTML='<div class="empty"><div class="empty-emoji">🎉</div><div class="empty-text">Sin materias mañana. ¡Día libre!</div></div>';return;}
+  const todayKey=new Date().toDateString()+'_'+manana; const checked=JSON.parse(localStorage.getItem('check_'+todayKey)||'[]');
+  materiasManana.forEach((item,idx)=>{
+    const mat=data.materias.find(m=>m.id===item.materiaId); if(!mat)return;
+    const itemId=mat.id+'_'+idx; const isDone=checked.includes(itemId);
+    const div=document.createElement('div'); div.className='check-item'+(isDone?' done':'');
+    div.innerHTML=`<div class="check-box">✓</div><div style="flex:1"><div class="check-label">${mat.nombre}</div>${item.nota?`<div style="font-size:11px;color:var(--text-muted)">📦 ${item.nota}</div>`:''}</div>`;
+    div.onclick=()=>{const arr=JSON.parse(localStorage.getItem('check_'+todayKey)||'[]');const i=arr.indexOf(itemId);if(i>=0)arr.splice(i,1);else arr.push(itemId);localStorage.setItem('check_'+todayKey,JSON.stringify(arr));renderChecklist();};
+    cont.appendChild(div);
+  });
+}
+function renderProximasTareas(){
+  const data=getData(); const cont=document.getElementById('proximasTareas'); cont.innerHTML='';
+  const pendientes=data.tareas.filter(t=>t.estado==='pendiente').sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega)).slice(0,3);
+  if(!pendientes.length){cont.innerHTML='<div class="empty"><div class="empty-emoji">✨</div><div class="empty-text">Sin tareas pendientes</div></div>';return;}
+  pendientes.forEach(t=>{const mat=data.materias.find(m=>m.id===t.materiaId);const div=document.createElement('div');div.className='item-card';div.innerHTML=`<div class="item-head"><div class="item-title">${t.titulo}</div><span class="chip">${t.fechaEntrega.slice(5)}</span></div>${mat?`<div class="item-meta">${mat.nombre}</div>`:''}${t.nota?`<div class="item-note">${t.nota}</div>`:''}`;cont.appendChild(div);});
+}
+function renderExtrasHoy(){
+  const data=getData(); const hoy=getDiaSemanaHoy(); const cont=document.getElementById('extrasHoy'); cont.innerHTML='';
+  const extras=data.extras.filter(e=>e.dias.includes(hoy));
+  if(!extras.length){cont.innerHTML='<div class="empty"><div class="empty-emoji">🏃</div><div class="empty-text">Sin extras hoy</div></div>';return;}
+  extras.forEach(e=>{const div=document.createElement('div');div.className='item-card';div.innerHTML=`<div class="item-head"><div class="item-title">${e.nombre}</div><span class="chip success">${e.horaInicio}</span></div>${e.nota?`<div class="item-note">📦 ${e.nota}</div>`:''}`;cont.appendChild(div);});
+}
 function renderDias(){
-  const data=getData();const c=document.getElementById('diasContainer');c.innerHTML='';
-  DIAS.forEach(function(d){
-    const div=document.createElement('div');div.className='card';
-    let html=data.horario[d].map(function(item){
-      const mat=data.materias.find(function(m){return m.id===item.materiaId;});
-      if(!mat) return '';
-      return '<span class="materia-tag" style="background:'+mat.color+'">'+mat.nombre+'<span style="background:rgba(0,0,0,.25);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;cursor:pointer" onclick="quitarMateria(\''+d+'\',\''+item.materiaId+'\')">x</span></span><div class="nota">'+(item.nota||'sin nota')+' <a href="#" onclick="editarNota(\''+d+'\',\''+item.materiaId+'\')">✏️</a></div>';
+  const data=getData(); const c=document.getElementById('diasContainer'); c.innerHTML='';
+  DIAS.forEach(d=>{
+    const div=document.createElement('div'); div.className='day-card';
+    let html=data.horario[d].map(item=>{
+      const mat=data.materias.find(m=>m.id===item.materiaId); if(!mat)return '';
+      return `<span class="materia-tag" style="background:${mat.color}">${mat.nombre}<span class="x" onclick="quitarMateria('${d}','${item.materiaId}')">✕</span></span>${item.nota?`<div class="nota">📦 ${item.nota} <a href="#" onclick="editarNota('${d}','${item.materiaId}');return false;" style="margin-left:auto">✏️</a></div>`:''}`;
     }).join('');
-    div.innerHTML='<div class="day-title">'+DIAS_LABEL[d]+' <span class="badge">'+data.horario[d].length+'</span></div><div>'+(html||'<p style="font-size:12px;color:#AAA">Vacio</p>')+'</div><div style="margin-top:10px"><div class="flex"><input id="input-'+d+'" class="input" placeholder="Materia..." oninput="showSug(\''+d+'\')" onkeydown="if(event.key===\'Enter\')addMateria(\''+d+'\')"><input type="color" id="color-'+d+'" value="'+ultimoColor+'" style="width:48px;height:44px;border:2px solid #FFE0B2;border-radius:12px;padding:2px"></div><div id="sug-'+d+'" class="sug"></div><input id="nota-'+d+'" class="input" placeholder="Que meter? opcional"><button class="btn btn-small" onclick="addMateria(\''+d+'\')">+ Agregar</button></div>';
+    div.innerHTML=`<div class="day-header"><div class="day-name">${DIAS_FULL[d]} <span class="day-badge">${data.horario[d].length}</span></div></div><div>${html||'<div style="font-size:12px;color:#94A3B8;padding:8px 0">Sin materias</div>'}</div><div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-strong)"><div class="input-row"><input id="input-${d}" class="input" placeholder="Materia..." oninput="showSug('${d}')" onkeydown="if(event.key==='Enter')addMateria('${d}')"><input type="color" id="color-${d}" value="${ultimoColor}" class="input-color"></div><div id="sug-${d}" class="sug"></div><input id="nota-${d}" class="input" placeholder="¿Qué llevar? (opcional)"><button class="btn btn-full btn-sm" style="margin-top:8px" onclick="addMateria('${d}')">+ Agregar</button></div>`;
     c.appendChild(div);
   });
 }
-function showSug(d){const val=document.getElementById('input-'+d).value.toLowerCase();const box=document.getElementById('sug-'+d);if(!val){box.innerHTML='';return;}const fil=SUGERENCIAS.filter(function(s){return s.toLowerCase().includes(val);}).slice(0,4);box.innerHTML=fil.map(function(s){return '<span onclick="pickSug(\''+d+'\',\''+s+'\')">'+s+'</span>';}).join('');}
+function showSug(d){const val=document.getElementById('input-'+d).value.toLowerCase();const box=document.getElementById('sug-'+d);if(!val){box.innerHTML='';return;}const fil=SUGERENCIAS.filter(s=>s.toLowerCase().includes(val)).slice(0,4);box.innerHTML=fil.map(s=>`<span onclick="pickSug('${d}','${s}')">${s}</span>`).join('');}
 function pickSug(d,s){document.getElementById('input-'+d).value=s;showSug(d);}
 function addMateria(d){
-  const data=getData();
-  const nombre=document.getElementById('input-'+d).value.trim();
-  let nota=document.getElementById('nota-'+d).value.trim();
-  let color=document.getElementById('color-'+d).value;
-  if(!nombre) return;
-  ultimoColor=color;
-  if(color.toLowerCase()==='#ffffff' || color.toLowerCase()==='#fff'){color='#8D6E63';}
-  let mat=data.materias.find(function(m){return m.nombre.toLowerCase()===nombre.toLowerCase();});
+  const data=getData(); const nombre=document.getElementById('input-'+d).value.trim(); let nota=document.getElementById('nota-'+d).value.trim(); let color=document.getElementById('color-'+d).value;
+  if(!nombre)return; ultimoColor=color; if(color.toLowerCase()==='#ffffff')color='#6366F1';
+  let mat=data.materias.find(m=>m.nombre.toLowerCase()===nombre.toLowerCase());
   if(!mat){mat={id:uid(),nombre:nombre,color:color};data.materias.push(mat);}else{mat.color=color;}
-  let existente=data.horario[d].find(function(x){return x.materiaId===mat.id;});
-  if(!existente){data.horario[d].push({materiaId:mat.id,nota:nota});}else if(nota){existente.nota=nota;}
-  document.getElementById('input-'+d).value='';document.getElementById('nota-'+d).value='';document.getElementById('sug-'+d).innerHTML='';save();
+  let existente=data.horario[d].find(x=>x.materiaId===mat.id); if(!existente)data.horario[d].push({materiaId:mat.id,nota:nota}); else if(nota)existente.nota=nota;
+  document.getElementById('input-'+d).value=''; document.getElementById('nota-'+d).value=''; document.getElementById('sug-'+d).innerHTML=''; save();
 }
-function quitarMateria(d,matId){const data=getData();data.horario[d]=data.horario[d].filter(function(x){return x.materiaId!==matId;});save();}
-function editarNota(d,matId){const actual=getData().horario[d].find(function(x){return x.materiaId===matId;});const n=prompt('Que debe llevar?',actual?actual.nota:'');if(n!==null){actual.nota=n;save();}}
-function guardarHora(){const data=getData();data.config.horaMochila=document.getElementById('horaMochila').value;save();alert('Guardado para '+app.hijos[app.activo].nombre+': '+data.config.horaMochila);}
+function quitarMateria(d,matId){const data=getData();data.horario[d]=data.horario[d].filter(x=>x.materiaId!==matId);save();}
+function editarNota(d,matId){const actual=getData().horario[d].find(x=>x.materiaId===matId);const n=prompt('¿Qué debe llevar?',actual?actual.nota:'');if(n!==null){actual.nota=n;save();}}
+function guardarHora(){const data=getData();data.config.horaMochila=document.getElementById('horaMochila').value;save();alert('Guardado: '+data.config.horaMochila);}
 function renderCalendarioSimple(){
-  const data=getData();const cont=document.getElementById('calendarioSimple');cont.innerHTML='';
-  DIAS.forEach(function(d){
-    const col=document.createElement('div');col.className='cal-col';
-    col.innerHTML='<h4>'+DIAS_LABEL[d]+'</h4>';
-    const lista=data.horario[d];
-    if(!lista.length){col.innerHTML+='<p style="font-size:10px;color:#AAA;text-align:center">Vacio</p>';}
-    else{
-      lista.forEach(function(item){
-        const mat=data.materias.find(function(m){return m.id===item.materiaId;});
-        if(!mat) return;
-        const div=document.createElement('div');div.className='cal-item';div.style.background=mat.color;
-        div.innerHTML=mat.nombre+(item.nota?'<br><small style="opacity:.9;font-weight:400">'+item.nota+'</small>':'');
-        col.appendChild(div);
-      });
-    }
+  const data=getData(); const cont=document.getElementById('calendarioSimple'); cont.innerHTML='';
+  DIAS.forEach(d=>{
+    const col=document.createElement('div'); col.className='cal-col'; col.innerHTML=`<h4>${DIAS_LABEL[d]}</h4>`;
+    const lista=data.horario[d]; if(!lista.length){col.innerHTML+='<div style="font-size:11px;color:#94A3B8">Vacío</div>';} else {lista.forEach(item=>{const mat=data.materias.find(m=>m.id===item.materiaId);if(!mat)return;const div=document.createElement('div');div.className='cal-item';div.style.background=mat.color;div.innerHTML=mat.nombre+(item.nota?`<br><small style="opacity:.85;font-weight:400">${item.nota}</small>`:'');col.appendChild(div);});}
     cont.appendChild(col);
   });
 }
-function renderSelectMaterias(){const data=getData();const sel=document.getElementById('tareaMateria');sel.innerHTML='<option value="">Sin materia</option>'+data.materias.map(function(m){return '<option value="'+m.id+'">'+m.nombre+'</option>';}).join('');}
-function showFormExtra(){document.getElementById('formExtra').classList.remove('hidden');renderDiasChecks();}function hideFormExtra(){document.getElementById('formExtra').classList.add('hidden');}
-function renderDiasChecks(){const c=document.getElementById('extraDias');const todos=['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];c.innerHTML=todos.map(function(d){return '<label style="font-size:12px"><input type="checkbox" value="'+d+'" '+( ['martes','jueves'].indexOf(d)>=0? 'checked' : '' )+'> '+DIAS_LABEL[d]+'</label>';}).join(' ');}
-function guardarExtra(){const data=getData();const nombre=document.getElementById('extraNombre').value.trim();const nota=document.getElementById('extraNota').value.trim();const hora=document.getElementById('extraHora').value;const ant=parseInt(document.getElementById('extraAnt').value);const dias=[];document.querySelectorAll('#extraDias input:checked').forEach(function(i){dias.push(i.value);});if(!nombre||!dias.length){alert('Falta nombre o dias');return;}data.extras.push({id:uid(),nombre:nombre,nota:nota,horaInicio:hora,dias:dias,anticipacionMinutos:ant});hideFormExtra();save();}
-function renderExtras(){const data=getData();const c=document.getElementById('listaExtras');c.innerHTML='';data.extras.forEach(function(e){const div=document.createElement('div');div.className='card';div.innerHTML='<div class="day-title">'+e.nombre+' <span class="badge">'+e.horaInicio+'</span></div><p style="font-size:12px">'+e.dias.map(function(d){return DIAS_LABEL[d];}).join(', ')+' · '+e.anticipacionMinutos+' min antes</p>'+(e.nota?'<div class="nota">'+e.nota+'</div>':'')+'<button class="btn btn-small btn-outline" style="margin-top:8px" onclick="borrarExtra(\''+e.id+'\')">Borrar</button>';c.appendChild(div);});}
-function borrarExtra(id){const data=getData();data.extras=data.extras.filter(function(e){return e.id!==id;});save();}
-function showFormTarea(){document.getElementById('formTarea').classList.remove('hidden');}function hideFormTarea(){document.getElementById('formTarea').classList.add('hidden');}
-function guardarTarea(){const data=getData();const titulo=document.getElementById('tareaTitulo').value.trim();const matId=document.getElementById('tareaMateria').value;const fecha=document.getElementById('tareaFecha').value;const nota=document.getElementById('tareaNota').value.trim();const aviso=document.getElementById('tareaAviso').value;if(!titulo||!fecha){alert('Falta titulo o fecha');return;}const partes=aviso.split('_');const diasAntes=partes[0];const horaAviso=partes[1];let fa=new Date(fecha);fa.setDate(fa.getDate()-parseInt(diasAntes));data.tareas.push({id:uid(),titulo:titulo,materiaId:matId,fechaEntrega:fecha,nota:nota,fechaAviso:fa.toISOString().slice(0,10),horaAviso:horaAviso,estado:'pendiente'});hideFormTarea();save();}
-function renderTareas(){const data=getData();const c=document.getElementById('listaTareas');c.innerHTML='';const sorted=data.tareas.filter(function(t){return t.estado==='pendiente';}).sort(function(a,b){return a.fechaEntrega.localeCompare(b.fechaEntrega);});sorted.forEach(function(t){const mat=data.materias.find(function(m){return m.id===t.materiaId;});const div=document.createElement('div');div.className='card';div.innerHTML='<div class="day-title">'+t.titulo+' '+(mat?'<span class="badge" style="background:'+mat.color+';color:white">'+mat.nombre+'</span>':'')+'</div><p style="font-size:12px">Entrega: '+t.fechaEntrega+' · Avisa: '+t.fechaAviso+' '+t.horaAviso+'</p>'+(t.nota?'<div class="nota">'+t.nota+'</div>':'')+'<div class="flex" style="margin-top:8px"><button class="btn btn-small" style="background:#4CAF50" onclick="marcarHecha(\''+t.id+'\')">Hecha</button><button class="btn btn-small btn-outline" onclick="borrarTarea(\''+t.id+'\')">Borrar</button></div>';c.appendChild(div);});if(!sorted.length) c.innerHTML='<div class="card"><p style="font-size:12px;color:#AAA">Sin pendientes de '+app.hijos[app.activo].nombre+' 🎉</p></div>';}
-function borrarTarea(id){const data=getData();data.tareas=data.tareas.filter(function(t){return t.id!==id;});save();}
-function marcarHecha(id){const data=getData();const t=data.tareas.find(function(x){return x.id===id;});if(t) t.estado='hecha';save();}
-function switchView(v){['colegio','calendario','extras','pendientes','demo'].forEach(function(x){document.getElementById('view-'+x).classList.add('hidden');document.getElementById('btn-'+x).classList.remove('active');});document.getElementById('view-'+v).classList.remove('hidden');document.getElementById('btn-'+v).classList.add('active');}
-function simularAlarmaMochila(){const data=getData();const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];const manana=mapa[(new Date().getDay()+1)%7];const hor=data.horario[manana]||[];let txt='Manana '+manana+' de '+app.hijos[app.activo].nombre+': '+(hor.length?hor.map(function(h){const m=data.materias.find(function(x){return x.id===h.materiaId;});return (m?m.nombre:'')+(h.nota?' ('+h.nota+')':'');}).join(', '):'nada');document.getElementById('logAlarmas').innerHTML='🔔 '+txt;alert(txt);}
-function simularAlarmaExtra(){const data=getData();if(!data.extras.length){alert('Crea extra primero');return;}const e=data.extras[0];const txt=app.hijos[app.activo].nombre+': En '+e.anticipacionMinutos+' min: '+e.nombre+'. Llevar: '+e.nota;document.getElementById('logAlarmas').innerHTML='⏰ '+txt;alert(txt);}
-function pedirPermiso(){Notification.requestPermission().then(function(p){alert('Permiso: '+p);});}
-function borrarTodoHijo(){if(confirm('Borrar todo de '+app.hijos[app.activo].nombre+'?')){app.hijos[app.activo].data=crearDataVacia();save();}}
-// ALARMA REAL
-function notificar(titulo, cuerpo){
-  if(Notification.permission!== 'granted') return;
-  new Notification(titulo, {body:cuerpo, icon:'https://cdn-icons-png.flaticon.com/512/167/167707.png'});
-  // vibración si es celular
-  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+function renderDiasChecks(){const c=document.getElementById('extraDias');const todos=['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];c.innerHTML=todos.map(d=>`<label><input type="checkbox" value="${d}" ${['martes','jueves'].indexOf(d)>=0?'checked':''}> ${DIAS_FULL[d]}</label>`).join('');}
+function guardarExtra(){
+  const data=getData(); const nombre=document.getElementById('extraNombre').value.trim(); const nota=document.getElementById('extraNota').value.trim(); const hora=document.getElementById('extraHora').value; const ant=parseInt(document.getElementById('extraAnt').value); const dias=[]; document.querySelectorAll('#extraDias input:checked').forEach(i=>dias.push(i.value));
+  if(!nombre||!dias.length){alert('Falta nombre o días');return;}
+  data.extras.push({id:uid(),nombre:nombre,nota:nota,horaInicio:hora,dias:dias,anticipacionMinutos:ant}); closeSheet('sheetExtra'); save();
 }
-
+function renderExtras(){
+  const data=getData(); const c=document.getElementById('listaExtras'); c.innerHTML='';
+  if(!data.extras.length){c.innerHTML='<div class="empty"><div class="empty-emoji">⚽</div><div class="empty-text">Sin actividades extras</div></div>';return;}
+  data.extras.forEach(e=>{
+    const div=document.createElement('div'); div.className='item-card';
+    div.innerHTML=`<div class="item-head"><div class="item-title">${e.nombre}</div><span class="chip success">${e.horaInicio}</span></div><div class="item-meta">${e.dias.map(d=>DIAS_LABEL[d]).join(' · ')}</div><div class="item-meta">Aviso: ${e.anticipacionMinutos} min antes</div>${e.nota?`<div class="item-note">📦 ${e.nota}</div>`:''}<div class="btn-row" style="margin-top:12px"><button class="btn btn-sm btn-danger" onclick="borrarExtra('${e.id}')">Eliminar</button></div>`;
+    c.appendChild(div);
+  });
+}
+function borrarExtra(id){if(!confirm('¿Eliminar actividad?'))return;const data=getData();data.extras=data.extras.filter(e=>e.id!==id);save();}
+function renderSelectMaterias(){const data=getData();const sel=document.getElementById('tareaMateria');sel.innerHTML='<option value="">Sin materia</option>'+data.materias.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');}
+function guardarTarea(){
+  const data=getData(); const titulo=document.getElementById('tareaTitulo').value.trim(); const matId=document.getElementById('tareaMateria').value; const fecha=document.getElementById('tareaFecha').value; const nota=document.getElementById('tareaNota').value.trim(); const aviso=document.getElementById('tareaAviso').value;
+  if(!titulo||!fecha){alert('Falta título o fecha');return;}
+  const partes=aviso.split('_'); const diasAntes=partes[0]; const horaAviso=partes[1]; let fa=new Date(fecha); fa.setDate(fa.getDate()-parseInt(diasAntes));
+  data.tareas.push({id:uid(),titulo:titulo,materiaId:matId,fechaEntrega:fecha,nota:nota,fechaAviso:fa.toISOString().slice(0,10),horaAviso:horaAviso,estado:'pendiente'}); closeSheet('sheetTarea'); save();
+}
+function renderTareas(){
+  const data=getData(); const c=document.getElementById('listaTareas'); c.innerHTML='';
+  const sorted=data.tareas.filter(t=>t.estado==='pendiente').sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega));
+  if(!sorted.length){c.innerHTML='<div class="empty"><div class="empty-emoji">🎉</div><div class="empty-text">Sin tareas pendientes</div></div>';return;}
+  sorted.forEach(t=>{
+    const mat=data.materias.find(m=>m.id===t.materiaId); const div=document.createElement('div'); div.className='item-card';
+    div.innerHTML=`<div class="item-head"><div class="item-title">${t.titulo}</div>${mat?`<span class="chip" style="background:${mat.color};color:white">${mat.nombre}</span>`:''}</div><div class="item-meta">📅 Entrega: ${t.fechaEntrega}</div><div class="item-meta">🔔 Aviso: ${t.fechaAviso} ${t.horaAviso}</div>${t.nota?`<div class="item-note">${t.nota}</div>`:''}<div class="btn-row" style="margin-top:12px"><button class="btn btn-sm btn-success" onclick="marcarHecha('${t.id}')">✓ Hecha</button><button class="btn btn-sm btn-danger" onclick="borrarTarea('${t.id}')">Eliminar</button></div>`;
+    c.appendChild(div);
+  });
+}
+function borrarTarea(id){if(!confirm('¿Eliminar tarea?'))return;const data=getData();data.tareas=data.tareas.filter(t=>t.id!==id);save();}
+function marcarHecha(id){const data=getData();const t=data.tareas.find(x=>x.id===id);if(t)t.estado='hecha';save();}
+function notificar(titulo,cuerpo){if(Notification.permission!=='granted')return; new Notification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/167/167707.png'}); if(navigator.vibrate)navigator.vibrate([200,100,200]);}
 function checkAlarmas(){
-  const data=getData();
-  const ahora=new Date();
-  const hhmm=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0');
-  const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-  const hoy=diaMap[ahora.getDay()];
-
-  // 1. Alarma mochila
-  if(data.config.horaMochila === hhmm){
-    const manana=diaMap[(ahora.getDay()+1)%7];
-    const materiasMañana=data.horario[manana]||[];
-    const lista=materiasMañana.map(m=>{
-      const mat=data.materias.find(x=>x.id===m.materiaId);
-      return mat? mat.nombre : '';
-    }).join(', ');
-    const key='mochila_'+ahora.toDateString()+'_'+hhmm;
-    if(!localStorage.getItem(key)){
-      notificar('🎒 Mochila de '+app.hijos[app.activo].nombre, 'Mañana toca: '+(lista||'nada')+'. ¡Arma la mochila!');
-      localStorage.setItem(key,'1');
-    }
+  const data=getData(); const ahora=new Date(); const hhmm=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0'); const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado']; const hoy=diaMap[ahora.getDay()];
+  if(data.config.horaMochila===hhmm){
+    const manana=diaMap[(ahora.getDay()+1)%7]; const materias=data.horario[manana]||[]; const lista=materias.map(m=>{const mat=data.materias.find(x=>x.id===m.materiaId);return mat?mat.nombre:'';}).filter(x=>x).join(', '); const key='mochila_'+ahora.toDateString()+'_'+hhmm;
+    if(!localStorage.getItem(key)){notificar('🎒 Mochila de '+app.hijos[app.activo].nombre,'Mañana: '+(lista||'nada')+'. ¡Arma la mochila!'); localStorage.setItem(key,'1');}
   }
-
-  // 2. Alarma extras
   data.extras.forEach(ex=>{
     if(ex.dias.includes(hoy)){
-      // calcular hora aviso = horaInicio - anticipacion
-      const [h,m]=ex.horaInicio.split(':').map(Number);
-      let minTotal=h*60+m - ex.anticipacionMinutos;
-      if(minTotal<0) minTotal+=1440;
-      const hh=Math.floor(minTotal/60).toString().padStart(2,'0');
-      const mm=(minTotal%60).toString().padStart(2,'0');
-      if(hh+':'+mm === hhmm){
-        const k='extra_'+ex.id+'_'+ahora.toDateString()+'_'+hhmm;
-        if(!localStorage.getItem(k)){
-          notificar('⚽ '+ex.nombre+' de '+app.hijos[app.activo].nombre, 'En '+ex.anticipacionMinutos+' min. Llevar: '+ex.nota);
-          localStorage.setItem(k,'1');
-        }
-      }
+      const [h,m]=ex.horaInicio.split(':').map(Number); let minTotal=h*60+m-ex.anticipacionMinutos; if(minTotal<0)minTotal+=1440; const hh=Math.floor(minTotal/60).toString().padStart(2,'0'); const mm=(minTotal%60).toString().padStart(2,'0');
+      if(hh+':'+mm===hhmm){const k='extra_'+ex.id+'_'+ahora.toDateString()+'_'+hhmm; if(!localStorage.getItem(k)){notificar('⚽ '+ex.nombre+' de '+app.hijos[app.activo].nombre,'En '+ex.anticipacionMinutos+' min. Llevar: '+ex.nota); localStorage.setItem(k,'1');}}
     }
   });
 }
-
-// revisar cada 30 seg
-setInterval(checkAlarmas, 30000);
-// pedir permiso al entrar la primera vez
-if(Notification.permission!== 'granted' && Notification.permission!== 'denied'){
-  setTimeout(()=>{ if(confirm('¿Activar alarmas para la mochila?')) pedirPermiso(); }, 2000);
+setInterval(checkAlarmas,30000);
+function simularAlarmaMochila(){const data=getData();const manana=getDiaSemanaManana();const hor=data.horario[manana]||[];let txt='Mañana ('+manana+') de '+app.hijos[app.activo].nombre+': '+(hor.length?hor.map(h=>{const m=data.materias.find(x=>x.id===h.materiaId);return (m?m.nombre:'')+(h.nota?' ('+h.nota+')':'');}).join(', '):'nada');alert('🔔 '+txt);}
+function simularAlarmaExtra(){const data=getData();if(!data.extras.length){alert('Crea un extra primero');return;}const e=data.extras[0];alert('⏰ '+app.hijos[app.activo].nombre+': En '+e.anticipacionMinutos+' min: '+e.nombre+'. Llevar: '+e.nota);}
+function pedirPermiso(){if(!('Notification' in window)){alert('Tu navegador no soporta notificaciones');return;}Notification.requestPermission().then(p=>{alert('Permiso: '+p); if(p==='granted')new Notification('🎒 ¡Notificaciones activas!','Recibirás avisos para la mochila');});}
+function borrarTodoHijo(){if(confirm('¿Borrar TODO de '+app.hijos[app.activo].nombre+'?')){app.hijos[app.activo].data=crearDataVacia();save();closeSheet('sheetSettings');}}
+function exportarDatos(){const blob=new Blob([JSON.stringify(app,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='mochila-lista-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);}
+function importarDatos(e){
+  const file=e.target.files[0]; if(!file)return; const reader=new FileReader();
+  reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result); if(data.hijos){if(confirm('¿Reemplazar todos los datos actuales?')){app=data;save();alert('Datos importados ✓');closeSheet('sheetSettings');}} else alert('Archivo inválido');}catch(err){alert('Error al leer el archivo');}};
+  reader.readAsText(file);
 }
-renderAll();renderDiasChecks();
+function renderAll(){
+  renderHijos(); const data=getData(); document.getElementById('horaMochila').value=data.config.horaMochila;
+  renderHero(); renderChecklist(); renderProximasTareas(); renderExtrasHoy(); renderDias(); renderExtras(); renderTareas(); renderSelectMaterias(); renderCalendarioSimple();
+}
+if(Notification.permission!=='granted' && Notification.permission!=='denied'){setTimeout(()=>{if(confirm('¿Activar notificaciones para la mochila?'))pedirPermiso();},2500);}
+renderAll(); renderDiasChecks();
 </script>
+<!-- PWA PRO - HACE QUE SEA APP INSTALABLE -->
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(()=>console.log('SW registrado OK'))
+      .catch(()=>console.log('SW fallo'));
+  });
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const b=document.getElementById('pwaBanner');
+  if(b) b.style.display='flex';
+});
+function instalarPWA(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{
+      deferredPrompt=null;
+      document.getElementById('pwaBanner').style.display='none';
+    });
+  }
+}
+</script>
+
+<div id="pwaBanner" style="display:none;position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:9999;background:#0F172A;color:white;padding:10px 16px;border-radius:999px;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.4);font-family:Inter,sans-serif;">
+<span style="font-weight:700;font-size:13px">📲 Instalar app</span>
+<button onclick="instalarPWA()" style="background:#6366F1;color:white;border:none;padding:7px 12px;border-radius:999px;font-weight:700;font-size:12px">Instalar</button>
+<button onclick="this.parentElement.style.display='none'" style="background:transparent;border:none;color:#94A3B8;font-size:16px;margin-left:4px">✕</button>
+</div>
 </body>
 </html>
