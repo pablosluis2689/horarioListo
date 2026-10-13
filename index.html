@@ -30,8 +30,10 @@ header{background:#fff;padding:16px;text-align:center;border-bottom:2px solid va
 .nota{font-size:12px;color:var(--muted);background:#FFF8E1;padding:4px 8px;border-radius:8px;margin-top:4px}
 .hijo-btn{padding:8px 14px;border-radius:20px;border:2px solid var(--border);font-weight:800;font-size:13px;cursor:pointer;background:#fff}
 .hijo-btn.active{background:#4E342E;color:#fff;border-color:#4E342E}
-.cal-simple{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.cal-col{background:#fff;border-radius:14px;padding:8px;border:1px solid var(--border);min-height:120px}
+.cal-simple{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.cal-simple::-webkit-scrollbar{display:none}
+.cal-col{flex:0 0 115px;background:#fff;border-radius:14px;padding:8px;border:1px solid var(--border);min-height:140px;scroll-snap-align:start}
+@media(min-width:480px){.cal-simple{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible}.cal-col{flex:1}}
 .cal-col h4{font-size:12px;font-weight:800;text-align:center;margin-bottom:8px}
 .cal-item{border-radius:10px;padding:6px 8px;margin-bottom:6px;color:#fff;font-size:11px;font-weight:700;text-align:center}
 </style>
@@ -158,6 +160,62 @@ function simularAlarmaMochila(){const data=getData();const mapa=['domingo','lune
 function simularAlarmaExtra(){const data=getData();if(!data.extras.length){alert('Crea extra primero');return;}const e=data.extras[0];const txt=app.hijos[app.activo].nombre+': En '+e.anticipacionMinutos+' min: '+e.nombre+'. Llevar: '+e.nota;document.getElementById('logAlarmas').innerHTML='⏰ '+txt;alert(txt);}
 function pedirPermiso(){Notification.requestPermission().then(function(p){alert('Permiso: '+p);});}
 function borrarTodoHijo(){if(confirm('Borrar todo de '+app.hijos[app.activo].nombre+'?')){app.hijos[app.activo].data=crearDataVacia();save();}}
+// ALARMA REAL
+function notificar(titulo, cuerpo){
+  if(Notification.permission!== 'granted') return;
+  new Notification(titulo, {body:cuerpo, icon:'https://cdn-icons-png.flaticon.com/512/167/167707.png'});
+  // vibración si es celular
+  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+}
+
+function checkAlarmas(){
+  const data=getData();
+  const ahora=new Date();
+  const hhmm=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0');
+  const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const hoy=diaMap[ahora.getDay()];
+
+  // 1. Alarma mochila
+  if(data.config.horaMochila === hhmm){
+    const manana=diaMap[(ahora.getDay()+1)%7];
+    const materiasMañana=data.horario[manana]||[];
+    const lista=materiasMañana.map(m=>{
+      const mat=data.materias.find(x=>x.id===m.materiaId);
+      return mat? mat.nombre : '';
+    }).join(', ');
+    const key='mochila_'+ahora.toDateString()+'_'+hhmm;
+    if(!localStorage.getItem(key)){
+      notificar('🎒 Mochila de '+app.hijos[app.activo].nombre, 'Mañana toca: '+(lista||'nada')+'. ¡Arma la mochila!');
+      localStorage.setItem(key,'1');
+    }
+  }
+
+  // 2. Alarma extras
+  data.extras.forEach(ex=>{
+    if(ex.dias.includes(hoy)){
+      // calcular hora aviso = horaInicio - anticipacion
+      const [h,m]=ex.horaInicio.split(':').map(Number);
+      let minTotal=h*60+m - ex.anticipacionMinutos;
+      if(minTotal<0) minTotal+=1440;
+      const hh=Math.floor(minTotal/60).toString().padStart(2,'0');
+      const mm=(minTotal%60).toString().padStart(2,'0');
+      if(hh+':'+mm === hhmm){
+        const k='extra_'+ex.id+'_'+ahora.toDateString()+'_'+hhmm;
+        if(!localStorage.getItem(k)){
+          notificar('⚽ '+ex.nombre+' de '+app.hijos[app.activo].nombre, 'En '+ex.anticipacionMinutos+' min. Llevar: '+ex.nota);
+          localStorage.setItem(k,'1');
+        }
+      }
+    }
+  });
+}
+
+// revisar cada 30 seg
+setInterval(checkAlarmas, 30000);
+// pedir permiso al entrar la primera vez
+if(Notification.permission!== 'granted' && Notification.permission!== 'denied'){
+  setTimeout(()=>{ if(confirm('¿Activar alarmas para la mochila?')) pedirPermiso(); }, 2000);
+}
 renderAll();renderDiasChecks();
 </script>
 </body>
