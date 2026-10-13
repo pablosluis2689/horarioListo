@@ -3,101 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Lista - Preview</title>
+<title>Mochila Lista Final</title>
 <meta name="theme-color" content="#FF8A65">
 <style>
-:root{--bg:#FFF8F0;--card:#FFFFFF;--accent:#FF8A65;--text:#4E342E;--muted:#8D6E63;--border:#FFE0B2}
+:root{--bg:#FFF8F0;--card:#fff;--accent:#FF8A65;--text:#4E342E;--muted:#8D6E63;--border:#FFE0B2}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 body{background:var(--bg);color:var(--text);padding-bottom:90px}
-header{background:#fff;padding:16px;text-align:center;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
+header{background:#fff;padding:16px;text-align:center;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:11}
 .container{max-width:480px;margin:0 auto;padding:12px}
 .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--border)}
-.btn{background:#FF8A65;color:white;border:none;padding:12px 18px;border-radius:12px;font-weight:700;width:100%;font-size:15px;cursor:pointer}
+.btn{background:#FF8A65;color:#fff;border:none;padding:12px 18px;border-radius:12px;font-weight:700;width:100%;font-size:15px;cursor:pointer}
 .btn-small{padding:8px 12px;width:auto;font-size:13px}
-.btn-outline{background:white;color:#FF8A65;border:2px solid #FF8A65}
+.btn-outline{background:#fff;color:#FF8A65;border:2px solid #FF8A65}
 .input{width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;margin:6px 0;font-size:15px}
-.label{font-size:12px;font-weight:700;color:var(--muted);margin-top:10px;display:block;text-transform:uppercase}
 .day-title{font-weight:800;font-size:16px;margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center}
-.materia-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;color:white;font-size:13px;margin:4px;font-weight:600}
-.materia-tag.x{cursor:pointer;background:rgba(0,0,0,.2);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+.materia-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;color:#fff;font-size:13px;margin:4px;font-weight:600}
 .sug{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .sug span{background:#FFF3E0;border:1px solid var(--border);padding:6px 10px;border-radius:20px;font-size:12px;cursor:pointer}
-.nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0;z-index:20}
-.nav button{background:none;border:none;font-size:22px;padding:6px 12px;cursor:pointer;opacity:.4}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0;z-index:20}
+.nav button{background:none;border:none;font-size:18px;padding:6px 8px;cursor:pointer;opacity:.4}
 .nav button.active{opacity:1;transform:scale(1.1)}
-.nav button small{display:block;font-size:9px;font-weight:700}
+.nav button small{display:block;font-size:8px;font-weight:700}
 .badge{background:#FFCCBC;padding:2px 8px;border-radius:10px;font-size:10px;margin-left:6px}
 .flex{display:flex;gap:8px;align-items:center}
 .hidden{display:none!important}
 .nota{font-size:12px;color:var(--muted);background:#FFF8E1;padding:4px 8px;border-radius:8px;margin-top:4px}
+.hijo-btn{padding:8px 14px;border-radius:20px;border:2px solid var(--border);font-weight:800;font-size:13px;cursor:pointer;background:#fff}
+.hijo-btn.active{background:#4E342E;color:#fff;border-color:#4E342E}
+.cal-simple{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cal-col{background:#fff;border-radius:14px;padding:8px;border:1px solid var(--border);min-height:120px}
+.cal-col h4{font-size:12px;font-weight:800;text-align:center;margin-bottom:8px}
+.cal-item{border-radius:10px;padding:6px 8px;margin-bottom:6px;color:#fff;font-size:11px;font-weight:700;text-align:center}
 </style>
 </head>
 <body>
-<header><h1>🎒 Mochila Lista</h1><p style="font-size:12px;color:#8D6E63">Configura una vez, se repite para siempre</p></header>
+<header>
+<h1>🎒 Mochila Lista</h1>
+<p style="font-size:12px;color:#8D6E63">Un horario por hijo - simple</p>
+<div style="margin-top:12px">
+<div id="hijosContainer" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+<div class="flex" style="max-width:340px;margin:10px auto 0"><input id="inputNuevoHijo" class="input" placeholder="Nombre hijo Ej: Sofia" style="margin:0"><button class="btn btn-small" onclick="agregarHijo()">+ Agregar</button></div>
+<div id="editHijoBox" class="hidden" style="max-width:340px;margin:8px auto 0;background:#FFF3E0;padding:8px;border-radius:12px"><div class="flex"><input id="inputEditHijo" class="input" style="margin:0"><button class="btn btn-small" onclick="confirmarRenombrar()">Guardar</button><button class="btn btn-small btn-outline" onclick="cancelarRenombrar()">X</button></div></div>
+<div class="flex" style="justify-content:center;margin-top:8px;gap:12px"><button style="background:none;border:none;color:#8D6E63;font-size:12px;font-weight:700" onclick="renombrarHijo()">✏️ Renombrar</button><button style="background:none;border:none;color:#E57373;font-size:12px;font-weight:700" onclick="borrarHijo()">🗑️ Borrar hijo</button></div>
+</div>
+</header>
 <div class="container">
-<div id="view-colegio">
-<div class="card"><strong>🔔 Alarma Mochila:</strong> <span id="horaMochilaLabel"></span>
-<div class="flex" style="margin-top:8px"><input type="time" id="horaMochila" class="input" style="flex:1" value="19:00"><button class="btn btn-small" onclick="guardarHora()">Guardar</button></div>
-<p style="font-size:11px;color:var(--muted);margin-top:6px">A esta hora te avisa qué toca mañana + qué meter. Valor por defecto 19:00 editable.</p></div>
-<div id="diasContainer"></div></div>
-
-<div id="view-extras" class="hidden">
-<div class="card"><h3>⚽ Actividades Extra</h3><button class="btn" style="margin-top:10px" onclick="showFormExtra()">+ Nueva Actividad</button>
-<div id="formExtra" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px">
-<input id="extraNombre" class="input" placeholder="Nombre ej: Fútbol">
-<input id="extraNota" class="input" placeholder="¿Qué llevar? ej: tacos, agua">
-<label class="label">Hora inicio</label><input id="extraHora" type="time" class="input" value="16:30">
-<label class="label">Días</label><div id="extraDias" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0"></div>
-<label class="label">Avisar con anticipación (editable)</label>
-<select id="extraAnt" class="input"><option value="15">15 min antes</option><option value="30">30 min antes</option><option value="60" selected>1 hora antes</option><option value="120">2 horas antes</option><option value="180">3 horas antes</option></select>
-<div class="flex"><button class="btn btn-small" onclick="guardarExtra()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormExtra()">Cancelar</button></div></div></div>
-<div id="listaExtras"></div></div>
-
-<div id="view-pendientes" class="hidden">
-<div class="card"><h3>📝 Tareas y Exámenes</h3><button class="btn" style="margin-top:10px" onclick="showFormTarea()">+ Nueva Tarea</button>
-<div id="formTarea" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px">
-<input id="tareaTitulo" class="input" placeholder="Título ej: Examen fracciones"><select id="tareaMateria" class="input"></select><input id="tareaFecha" type="date" class="input"><input id="tareaNota" class="input" placeholder="Nota ej: pág 20">
-<label class="label">¿Cuándo avisar?</label><select id="tareaAviso" class="input"><option value="0_07:00">Mismo día 7am</option><option value="1_19:00" selected>1 día antes 7pm</option><option value="2_19:00">2 días antes 7pm</option><option value="7_19:00">1 semana antes</option></select>
-<div class="flex"><button class="btn btn-small" onclick="guardarTarea()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormTarea()">Cancelar</button></div></div></div>
-<div id="listaTareas"></div></div>
-
-<div id="view-demo" class="hidden">
-<div class="card"><h3>🔔 Probar Alarmas</h3><button class="btn" onclick="simularAlarmaMochila()">Probar Alarma Mochila</button><button class="btn" style="margin-top:8px;background:#8D6E63" onclick="simularAlarmaExtra()">Probar Alarma Extra</button><button class="btn" style="margin-top:8px;background:#4CAF50" onclick="pedirPermiso()">Activar Notificaciones</button><div id="logAlarmas" style="margin-top:12px;font-size:12px;background:#FFF3E0;padding:10px;border-radius:10px"></div></div>
-<div class="card"><button class="btn btn-outline" onclick="borrarTodo()">🗑️ Borrar todo</button></div></div>
+<div id="view-colegio"><div class="card"><strong>🔔 Alarma de <span id="nombreActivo1"></span>:</strong> <span id="horaMochilaLabel"></span><div class="flex" style="margin-top:8px"><input type="time" id="horaMochila" class="input" style="flex:1" value="19:00"><button class="btn btn-small" onclick="guardarHora()">Guardar</button></div><button class="btn btn-outline" style="margin-top:10px" onclick="switchView('calendario')">📅 Ver calendario simple</button></div><div id="diasContainer"></div></div>
+<div id="view-calendario" class="hidden"><div class="card"><h3>📅 Horario de <span class="nombreActivo"></span></h3><p style="font-size:11px;color:var(--muted)">Vista general sin horas - v1 gratis</p><button class="btn" style="margin-top:10px" onclick="window.print()">🖨️ Imprimir</button></div><div class="card"><div id="calendarioSimple" class="cal-simple"></div></div><div class="card"><button class="btn btn-outline" onclick="switchView('colegio')">← Volver</button></div></div>
+<div id="view-extras" class="hidden"><div class="card"><h3>⚽ Extras de <span class="nombreActivo"></span></h3><button class="btn" style="margin-top:10px" onclick="showFormExtra()">+ Nueva Actividad</button><div id="formExtra" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px"><input id="extraNombre" class="input" placeholder="Nombre ej: Futbol"><input id="extraNota" class="input" placeholder="¿Que llevar?"><label class="label">Hora inicio</label><input id="extraHora" type="time" class="input" value="16:30"><label class="label">Dias</label><div id="extraDias" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0"></div><label class="label">Avisar</label><select id="extraAnt" class="input"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>1 hora</option><option value="120">2 horas</option></select><div class="flex"><button class="btn btn-small" onclick="guardarExtra()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormExtra()">Cancelar</button></div></div></div><div id="listaExtras"></div></div>
+<div id="view-pendientes" class="hidden"><div class="card"><h3>📝 Tareas de <span class="nombreActivo"></span></h3><button class="btn" style="margin-top:10px" onclick="showFormTarea()">+ Nueva Tarea</button><div id="formTarea" class="hidden" style="margin-top:12px;border-top:1px dashed #FFE0B2;padding-top:12px"><input id="tareaTitulo" class="input" placeholder="Titulo"><select id="tareaMateria" class="input"></select><input id="tareaFecha" type="date" class="input"><input id="tareaNota" class="input" placeholder="Nota"><label class="label">Cuando avisar?</label><select id="tareaAviso" class="input"><option value="0_07:00">Mismo dia 7am</option><option value="1_19:00" selected>1 dia antes 7pm</option><option value="2_19:00">2 dias antes</option><option value="7_19:00">1 semana antes</option></select><div class="flex"><button class="btn btn-small" onclick="guardarTarea()">Guardar</button><button class="btn btn-small btn-outline" onclick="hideFormTarea()">Cancelar</button></div></div></div><div id="listaTareas"></div></div>
+<div id="view-demo" class="hidden"><div class="card"><h3>🔔 Alarmas de <span class="nombreActivo"></span></h3><button class="btn" onclick="simularAlarmaMochila()">Probar Mochila</button><button class="btn" style="margin-top:8px;background:#8D6E63" onclick="simularAlarmaExtra()">Probar Extra</button><button class="btn" style="margin-top:8px;background:#4CAF50" onclick="pedirPermiso()">Activar Notificaciones</button><div id="logAlarmas" style="margin-top:12px;font-size:12px;background:#FFF3E0;padding:10px;border-radius:10px"></div></div><div class="card"><button class="btn btn-outline" onclick="borrarTodoHijo()">Borrar datos de este hijo</button></div></div>
 </div>
-<div class="nav">
-<button id="btn-colegio" class="active" onclick="switchView('colegio')">📚<small>COLEGIO</small></button>
-<button id="btn-extras" onclick="switchView('extras')">⚽<small>EXTRAS</small></button>
-<button id="btn-pendientes" onclick="switchView('pendientes')">📝<small>TAREAS</small></button>
-<button id="btn-demo" onclick="switchView('demo')">🔔<small>ALARMAS</small></button>
-</div>
+<div class="nav"><button id="btn-colegio" class="active" onclick="switchView('colegio')">📚<small>COLEGIO</small></button><button id="btn-calendario" onclick="switchView('calendario')">📅<small>CALEND</small></button><button id="btn-extras" onclick="switchView('extras')">⚽<small>EXTRAS</small></button><button id="btn-pendientes" onclick="switchView('pendientes')">📝<small>TAREAS</small></button><button id="btn-demo" onclick="switchView('demo')">🔔<small>ALARMAS</small></button></div>
 <script>
-const DIAS=['lunes','martes','miercoles','jueves','viernes'];const DIAS_LABEL={lunes:'Lunes',martes:'Martes',miercoles:'Miércoles',jueves:'Jueves',viernes:'Viernes',sabado:'Sábado',domingo:'Domingo'};const SUGERENCIAS=['Matemática','Lengua','Ciencias','Sociales','Inglés','Educación Física','Arte','Música','Formación','Computación','Proyecto','Deporte'];const COLORES=['#E57373','#64B5F6','#81C784','#FFB74D','#BA68C8','#4DB6AC','#FF8A65','#90A4AE'];
-let data=JSON.parse(localStorage.getItem('mochila_v4')||'null')||{materias:[],horario:{lunes:[],martes:[],miercoles:[],jueves:[],viernes:[]},extras:[],tareas:[],config:{horaMochila:'19:00'}};
-function save(){localStorage.setItem('mochila_v4',JSON.stringify(data));renderAll();}function uid(){return Math.random().toString(36).slice(2,9);}
-function renderAll(){document.getElementById('horaMochila').value=data.config.horaMochila;document.getElementById('horaMochilaLabel').innerText=data.config.horaMochila;renderDias();renderExtras();renderTareas();renderSelectMaterias();}
-function renderDias(){const c=document.getElementById('diasContainer');c.innerHTML='';DIAS.forEach(d=>{const div=document.createElement('div');div.className='card';let html=data.horario[d].map(item=>{const mat=data.materias.find(m=>m.id===item.materiaId);if(!mat)return'';return `<span class="materia-tag" style="background:${mat.color}">${mat.nombre}<span class="x" onclick="quitarMateria('${d}','${item.materiaId}')">×</span></span><div class="nota">${item.nota||'sin nota'} <a href="#" onclick="editarNota('${d}','${item.materiaId}')">✏️</a></div>`;}).join('');div.innerHTML=`<div class="day-title">${DIAS_LABEL[d]} <span class="badge">${data.horario[d].length}</span></div><div>${html||'<p style="font-size:12px;color:#AAA">Vacío</p>'}</div><div style="margin-top:8px"><div class="flex"><input id="input-${d}" class="input" placeholder="Escribe materia..." oninput="showSug('${d}')" onkeydown="if(event.key==='Enter')addMateria('${d}')"><input type="color" id="color-${d}" value="${COLORES[Math.floor(Math.random()*COLORES.length)]}" style="width:40px;height:40px;border:none"></div><div id="sug-${d}" class="sug"></div><input id="nota-${d}" class="input" placeholder="¿Qué meter? opcional"><button class="btn btn-small" onclick="addMateria('${d}')">+ Agregar</button></div>`;c.appendChild(div);});}
-function showSug(d){const val=document.getElementById('input-'+d).value.toLowerCase();const box=document.getElementById('sug-'+d);if(!val){box.innerHTML='';return}const fil=SUGERENCIAS.filter(s=>s.toLowerCase().includes(val)).slice(0,4);box.innerHTML=fil.map(s=>`<span onclick="pickSug('${d}','${s}')">${s}</span>`).join('');}
+const DIAS=['lunes','martes','miercoles','jueves','viernes'];
+const DIAS_LABEL={lunes:'Lunes',martes:'Martes',miercoles:'Miercoles',jueves:'Jueves',viernes:'Viernes',sabado:'Sabado',domingo:'Domingo'};
+const SUGERENCIAS=['Matematica','Lengua','Ciencias','Sociales','Ingles','Educacion Fisica','Arte','Musica','Formacion','Computacion','Proyecto','Deporte'];
+let ultimoColor='#FF8A65';
+function crearDataVacia(){return {materias:[],horario:{lunes:[],martes:[],miercoles:[],jueves:[],viernes:[]},extras:[],tareas:[],config:{horaMochila:'19:00'}};}
+let app=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
+if(!app){
+  let old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
+  if(!old) old=JSON.parse(localStorage.getItem('mochila_v4')||'null');
+  if(old && old.hijos){app=old;}
+  else if(old && old.materias){app={hijos:[{id:Date.now(),nombre:'Hijo 1',data:old}],activo:0};}
+  else{app={hijos:[{id:Date.now(),nombre:'Sofia',data:crearDataVacia()}],activo:0};}
+}
+function getData(){return app.hijos[app.activo].data;}
+function save(){localStorage.setItem('mochila_final_v2',JSON.stringify(app));localStorage.setItem('mochila_multi_v1',JSON.stringify(app));renderAll();}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function renderHijos(){
+  const cont=document.getElementById('hijosContainer');cont.innerHTML='';
+  app.hijos.forEach((h,i)=>{
+    const b=document.createElement('button');
+    b.className='hijo-btn'+(i===app.activo?' active':'');
+    b.textContent=h.nombre;
+    b.onclick=function(){app.activo=i;save();};
+    cont.appendChild(b);
+  });
+  const n=app.hijos[app.activo]? app.hijos[app.activo].nombre : '';
+  document.getElementById('nombreActivo1').textContent=n;
+  document.querySelectorAll('.nombreActivo').forEach(function(e){e.textContent=n;});
+}
+function agregarHijo(){const inp=document.getElementById('inputNuevoHijo');const nombre=inp.value.trim();if(!nombre){alert('Escribe el nombre');return;}app.hijos.push({id:Date.now(),nombre:nombre,data:crearDataVacia()});app.activo=app.hijos.length-1;inp.value='';save();}
+function renombrarHijo(){document.getElementById('editHijoBox').classList.remove('hidden');document.getElementById('inputEditHijo').value=app.hijos[app.activo].nombre;document.getElementById('inputEditHijo').focus();}
+function confirmarRenombrar(){const nuevo=document.getElementById('inputEditHijo').value.trim();if(nuevo){app.hijos[app.activo].nombre=nuevo;save();}cancelarRenombrar();}
+function cancelarRenombrar(){document.getElementById('editHijoBox').classList.add('hidden');}
+function borrarHijo(){if(app.hijos.length===1){alert('Debe quedar al menos 1 hijo');return;}if(!confirm('Borrar a '+app.hijos[app.activo].nombre+'?'))return;app.hijos.splice(app.activo,1);app.activo=0;save();}
+function renderAll(){renderHijos();const data=getData();document.getElementById('horaMochila').value=data.config.horaMochila;document.getElementById('horaMochilaLabel').innerText=data.config.horaMochila;renderDias();renderExtras();renderTareas();renderSelectMaterias();renderCalendarioSimple();}
+function renderDias(){
+  const data=getData();const c=document.getElementById('diasContainer');c.innerHTML='';
+  DIAS.forEach(function(d){
+    const div=document.createElement('div');div.className='card';
+    let html=data.horario[d].map(function(item){
+      const mat=data.materias.find(function(m){return m.id===item.materiaId;});
+      if(!mat) return '';
+      return '<span class="materia-tag" style="background:'+mat.color+'">'+mat.nombre+'<span style="background:rgba(0,0,0,.25);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;cursor:pointer" onclick="quitarMateria(\''+d+'\',\''+item.materiaId+'\')">x</span></span><div class="nota">'+(item.nota||'sin nota')+' <a href="#" onclick="editarNota(\''+d+'\',\''+item.materiaId+'\')">✏️</a></div>';
+    }).join('');
+    div.innerHTML='<div class="day-title">'+DIAS_LABEL[d]+' <span class="badge">'+data.horario[d].length+'</span></div><div>'+(html||'<p style="font-size:12px;color:#AAA">Vacio</p>')+'</div><div style="margin-top:10px"><div class="flex"><input id="input-'+d+'" class="input" placeholder="Materia..." oninput="showSug(\''+d+'\')" onkeydown="if(event.key===\'Enter\')addMateria(\''+d+'\')"><input type="color" id="color-'+d+'" value="'+ultimoColor+'" style="width:48px;height:44px;border:2px solid #FFE0B2;border-radius:12px;padding:2px"></div><div id="sug-'+d+'" class="sug"></div><input id="nota-'+d+'" class="input" placeholder="Que meter? opcional"><button class="btn btn-small" onclick="addMateria(\''+d+'\')">+ Agregar</button></div>';
+    c.appendChild(div);
+  });
+}
+function showSug(d){const val=document.getElementById('input-'+d).value.toLowerCase();const box=document.getElementById('sug-'+d);if(!val){box.innerHTML='';return;}const fil=SUGERENCIAS.filter(function(s){return s.toLowerCase().includes(val);}).slice(0,4);box.innerHTML=fil.map(function(s){return '<span onclick="pickSug(\''+d+'\',\''+s+'\')">'+s+'</span>';}).join('');}
 function pickSug(d,s){document.getElementById('input-'+d).value=s;showSug(d);}
-function addMateria(d){const nombre=document.getElementById('input-'+d).value.trim();const nota=document.getElementById('nota-'+d).value.trim();const color=document.getElementById('color-'+d).value;if(!nombre)return;let mat=data.materias.find(m=>m.nombre.toLowerCase()===nombre.toLowerCase());if(!mat){mat={id:uid(),nombre,color};data.materias.push(mat);}if(!data.horario[d].find(x=>x.materiaId===mat.id)){data.horario[d].push({materiaId:mat.id,nota});}document.getElementById('input-'+d).value='';document.getElementById('nota-'+d).value='';document.getElementById('sug-'+d).innerHTML='';save();}
-function quitarMateria(d,matId){data.horario[d]=data.horario[d].filter(x=>x.materiaId!==matId);save();}
-function editarNota(d,matId){const n=prompt('¿Qué debe llevar?');if(n!==null){const it=data.horario[d].find(x=>x.materiaId===matId);if(it)it.nota=n;save();}}
-function guardarHora(){data.config.horaMochila=document.getElementById('horaMochila').value;save();alert('Guardado: '+data.config.horaMochila);}
-function renderSelectMaterias(){const sel=document.getElementById('tareaMateria');sel.innerHTML='<option value="">Sin materia</option>'+data.materias.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');}
+function addMateria(d){
+  const data=getData();
+  const nombre=document.getElementById('input-'+d).value.trim();
+  let nota=document.getElementById('nota-'+d).value.trim();
+  let color=document.getElementById('color-'+d).value;
+  if(!nombre) return;
+  ultimoColor=color;
+  if(color.toLowerCase()==='#ffffff' || color.toLowerCase()==='#fff'){color='#8D6E63';}
+  let mat=data.materias.find(function(m){return m.nombre.toLowerCase()===nombre.toLowerCase();});
+  if(!mat){mat={id:uid(),nombre:nombre,color:color};data.materias.push(mat);}else{mat.color=color;}
+  let existente=data.horario[d].find(function(x){return x.materiaId===mat.id;});
+  if(!existente){data.horario[d].push({materiaId:mat.id,nota:nota});}else if(nota){existente.nota=nota;}
+  document.getElementById('input-'+d).value='';document.getElementById('nota-'+d).value='';document.getElementById('sug-'+d).innerHTML='';save();
+}
+function quitarMateria(d,matId){const data=getData();data.horario[d]=data.horario[d].filter(function(x){return x.materiaId!==matId;});save();}
+function editarNota(d,matId){const actual=getData().horario[d].find(function(x){return x.materiaId===matId;});const n=prompt('Que debe llevar?',actual?actual.nota:'');if(n!==null){actual.nota=n;save();}}
+function guardarHora(){const data=getData();data.config.horaMochila=document.getElementById('horaMochila').value;save();alert('Guardado para '+app.hijos[app.activo].nombre+': '+data.config.horaMochila);}
+function renderCalendarioSimple(){
+  const data=getData();const cont=document.getElementById('calendarioSimple');cont.innerHTML='';
+  DIAS.forEach(function(d){
+    const col=document.createElement('div');col.className='cal-col';
+    col.innerHTML='<h4>'+DIAS_LABEL[d]+'</h4>';
+    const lista=data.horario[d];
+    if(!lista.length){col.innerHTML+='<p style="font-size:10px;color:#AAA;text-align:center">Vacio</p>';}
+    else{
+      lista.forEach(function(item){
+        const mat=data.materias.find(function(m){return m.id===item.materiaId;});
+        if(!mat) return;
+        const div=document.createElement('div');div.className='cal-item';div.style.background=mat.color;
+        div.innerHTML=mat.nombre+(item.nota?'<br><small style="opacity:.9;font-weight:400">'+item.nota+'</small>':'');
+        col.appendChild(div);
+      });
+    }
+    cont.appendChild(col);
+  });
+}
+function renderSelectMaterias(){const data=getData();const sel=document.getElementById('tareaMateria');sel.innerHTML='<option value="">Sin materia</option>'+data.materias.map(function(m){return '<option value="'+m.id+'">'+m.nombre+'</option>';}).join('');}
 function showFormExtra(){document.getElementById('formExtra').classList.remove('hidden');renderDiasChecks();}function hideFormExtra(){document.getElementById('formExtra').classList.add('hidden');}
-function renderDiasChecks(){const c=document.getElementById('extraDias');const todos=['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];c.innerHTML=todos.map(d=>`<label style="font-size:12px"><input type="checkbox" value="${d}" ${['martes','jueves'].includes(d)?'checked':''}> ${DIAS_LABEL[d]}</label>`).join(' ');}
-function guardarExtra(){const nombre=document.getElementById('extraNombre').value.trim();const nota=document.getElementById('extraNota').value.trim();const hora=document.getElementById('extraHora').value;const ant=parseInt(document.getElementById('extraAnt').value);const dias=[...document.querySelectorAll('#extraDias input:checked')].map(i=>i.value);if(!nombre||!dias.length)return alert('Falta nombre o días');data.extras.push({id:uid(),nombre,nota,horaInicio:hora,dias,anticipacionMinutos:ant});hideFormExtra();save();}
-function renderExtras(){const c=document.getElementById('listaExtras');c.innerHTML='';data.extras.forEach(e=>{const div=document.createElement('div');div.className='card';div.innerHTML=`<div class="day-title">${e.nombre} <span class="badge">${e.horaInicio}</span></div><p style="font-size:12px">${e.dias.map(d=>DIAS_LABEL[d]).join(', ')} · Avisa ${e.anticipacionMinutos} min antes</p>${e.nota?`<div class="nota">${e.nota}</div>`:''}<button class="btn btn-small btn-outline" style="margin-top:8px" onclick="borrarExtra('${e.id}')">Borrar</button>`;c.appendChild(div);});}
-function borrarExtra(id){data.extras=data.extras.filter(e=>e.id!==id);save();}
+function renderDiasChecks(){const c=document.getElementById('extraDias');const todos=['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];c.innerHTML=todos.map(function(d){return '<label style="font-size:12px"><input type="checkbox" value="'+d+'" '+( ['martes','jueves'].indexOf(d)>=0? 'checked' : '' )+'> '+DIAS_LABEL[d]+'</label>';}).join(' ');}
+function guardarExtra(){const data=getData();const nombre=document.getElementById('extraNombre').value.trim();const nota=document.getElementById('extraNota').value.trim();const hora=document.getElementById('extraHora').value;const ant=parseInt(document.getElementById('extraAnt').value);const dias=[];document.querySelectorAll('#extraDias input:checked').forEach(function(i){dias.push(i.value);});if(!nombre||!dias.length){alert('Falta nombre o dias');return;}data.extras.push({id:uid(),nombre:nombre,nota:nota,horaInicio:hora,dias:dias,anticipacionMinutos:ant});hideFormExtra();save();}
+function renderExtras(){const data=getData();const c=document.getElementById('listaExtras');c.innerHTML='';data.extras.forEach(function(e){const div=document.createElement('div');div.className='card';div.innerHTML='<div class="day-title">'+e.nombre+' <span class="badge">'+e.horaInicio+'</span></div><p style="font-size:12px">'+e.dias.map(function(d){return DIAS_LABEL[d];}).join(', ')+' · '+e.anticipacionMinutos+' min antes</p>'+(e.nota?'<div class="nota">'+e.nota+'</div>':'')+'<button class="btn btn-small btn-outline" style="margin-top:8px" onclick="borrarExtra(\''+e.id+'\')">Borrar</button>';c.appendChild(div);});}
+function borrarExtra(id){const data=getData();data.extras=data.extras.filter(function(e){return e.id!==id;});save();}
 function showFormTarea(){document.getElementById('formTarea').classList.remove('hidden');}function hideFormTarea(){document.getElementById('formTarea').classList.add('hidden');}
-function guardarTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const matId=document.getElementById('tareaMateria').value;const fecha=document.getElementById('tareaFecha').value;const nota=document.getElementById('tareaNota').value.trim();const aviso=document.getElementById('tareaAviso').value;if(!titulo||!fecha)return alert('Falta título o fecha');const [diasAntes,horaAviso]=aviso.split('_');let fa=new Date(fecha);fa.setDate(fa.getDate()-parseInt(diasAntes));data.tareas.push({id:uid(),titulo,materiaId:matId,fechaEntrega:fecha,nota,fechaAviso:fa.toISOString().slice(0,10),horaAviso,estado:'pendiente'});hideFormTarea();save();}
-function renderTareas(){const c=document.getElementById('listaTareas');c.innerHTML='';const sorted=[...data.tareas].filter(t=>t.estado==='pendiente').sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega));sorted.forEach(t=>{const mat=data.materias.find(m=>m.id===t.materiaId);const div=document.createElement('div');div.className='card';div.innerHTML=`<div class="day-title">${t.titulo} ${mat?`<span class="badge" style="background:${mat.color};color:white">${mat.nombre}</span>`:''}</div><p style="font-size:12px">Entrega: ${t.fechaEntrega} · Avisa: ${t.fechaAviso} ${t.horaAviso}</p>${t.nota?`<div class="nota">${t.nota}</div>`:''}<div class="flex" style="margin-top:8px"><button class="btn btn-small" style="background:#4CAF50" onclick="marcarHecha('${t.id}')">✓ Hecha</button><button class="btn btn-small btn-outline" onclick="borrarTarea('${t.id}')">Borrar</button></div>`;c.appendChild(div);});if(!sorted.length)c.innerHTML='<div class="card"><p style="font-size:12px;color:#AAA">Sin pendientes 🎉</p></div>';}
-function borrarTarea(id){data.tareas=data.tareas.filter(t=>t.id!==id);save();}function marcarHecha(id){const t=data.tareas.find(x=>x.id===id);if(t)t.estado='hecha';save();}
-function switchView(v){['colegio','extras','pendientes','demo'].forEach(x=>{document.getElementById('view-'+x).classList.add('hidden');document.getElementById('btn-'+x).classList.remove('active');});document.getElementById('view-'+v).classList.remove('hidden');document.getElementById('btn-'+v).classList.add('active');}
-function simularAlarmaMochila(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];const manana=mapa[(new Date().getDay()+1)%7];const hor=data.horario[manana]||[];let txt=`Mañana ${manana} toca: `+(hor.length?hor.map(h=>{const m=data.materias.find(x=>x.id===h.materiaId);return `${m?m.nombre:''}${h.nota?' ('+h.nota+')':''}`;}).join(', '):'nada');document.getElementById('logAlarmas').innerHTML=`🔔 ${txt}`;if(Notification.permission==='granted'){new Notification('🎒 Mochila Lista',{body:txt});}else{alert(txt);}}
-function simularAlarmaExtra(){if(!data.extras.length)return alert('Crea extra primero');const e=data.extras[0];const txt=`En ${e.anticipacionMinutos} min: ${e.nombre}. Llevar: ${e.nota}`;document.getElementById('logAlarmas').innerHTML=`⏰ ${txt}`;if(Notification.permission==='granted'){new Notification('⏰ Actividad',{body:txt});}else{alert(txt);}}
-function pedirPermiso(){Notification.requestPermission().then(p=>alert('Permiso: '+p));}
-function borrarTodo(){if(confirm('¿Borrar todo?')){localStorage.removeItem('mochila_v4');location.reload();}}
+function guardarTarea(){const data=getData();const titulo=document.getElementById('tareaTitulo').value.trim();const matId=document.getElementById('tareaMateria').value;const fecha=document.getElementById('tareaFecha').value;const nota=document.getElementById('tareaNota').value.trim();const aviso=document.getElementById('tareaAviso').value;if(!titulo||!fecha){alert('Falta titulo o fecha');return;}const partes=aviso.split('_');const diasAntes=partes[0];const horaAviso=partes[1];let fa=new Date(fecha);fa.setDate(fa.getDate()-parseInt(diasAntes));data.tareas.push({id:uid(),titulo:titulo,materiaId:matId,fechaEntrega:fecha,nota:nota,fechaAviso:fa.toISOString().slice(0,10),horaAviso:horaAviso,estado:'pendiente'});hideFormTarea();save();}
+function renderTareas(){const data=getData();const c=document.getElementById('listaTareas');c.innerHTML='';const sorted=data.tareas.filter(function(t){return t.estado==='pendiente';}).sort(function(a,b){return a.fechaEntrega.localeCompare(b.fechaEntrega);});sorted.forEach(function(t){const mat=data.materias.find(function(m){return m.id===t.materiaId;});const div=document.createElement('div');div.className='card';div.innerHTML='<div class="day-title">'+t.titulo+' '+(mat?'<span class="badge" style="background:'+mat.color+';color:white">'+mat.nombre+'</span>':'')+'</div><p style="font-size:12px">Entrega: '+t.fechaEntrega+' · Avisa: '+t.fechaAviso+' '+t.horaAviso+'</p>'+(t.nota?'<div class="nota">'+t.nota+'</div>':'')+'<div class="flex" style="margin-top:8px"><button class="btn btn-small" style="background:#4CAF50" onclick="marcarHecha(\''+t.id+'\')">Hecha</button><button class="btn btn-small btn-outline" onclick="borrarTarea(\''+t.id+'\')">Borrar</button></div>';c.appendChild(div);});if(!sorted.length) c.innerHTML='<div class="card"><p style="font-size:12px;color:#AAA">Sin pendientes de '+app.hijos[app.activo].nombre+' 🎉</p></div>';}
+function borrarTarea(id){const data=getData();data.tareas=data.tareas.filter(function(t){return t.id!==id;});save();}
+function marcarHecha(id){const data=getData();const t=data.tareas.find(function(x){return x.id===id;});if(t) t.estado='hecha';save();}
+function switchView(v){['colegio','calendario','extras','pendientes','demo'].forEach(function(x){document.getElementById('view-'+x).classList.add('hidden');document.getElementById('btn-'+x).classList.remove('active');});document.getElementById('view-'+v).classList.remove('hidden');document.getElementById('btn-'+v).classList.add('active');}
+function simularAlarmaMochila(){const data=getData();const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];const manana=mapa[(new Date().getDay()+1)%7];const hor=data.horario[manana]||[];let txt='Manana '+manana+' de '+app.hijos[app.activo].nombre+': '+(hor.length?hor.map(function(h){const m=data.materias.find(function(x){return x.id===h.materiaId;});return (m?m.nombre:'')+(h.nota?' ('+h.nota+')':'');}).join(', '):'nada');document.getElementById('logAlarmas').innerHTML='🔔 '+txt;alert(txt);}
+function simularAlarmaExtra(){const data=getData();if(!data.extras.length){alert('Crea extra primero');return;}const e=data.extras[0];const txt=app.hijos[app.activo].nombre+': En '+e.anticipacionMinutos+' min: '+e.nombre+'. Llevar: '+e.nota;document.getElementById('logAlarmas').innerHTML='⏰ '+txt;alert(txt);}
+function pedirPermiso(){Notification.requestPermission().then(function(p){alert('Permiso: '+p);});}
+function borrarTodoHijo(){if(confirm('Borrar todo de '+app.hijos[app.activo].nombre+'?')){app.hijos[app.activo].data=crearDataVacia();save();}}
 renderAll();renderDiasChecks();
 </script>
 </body>
