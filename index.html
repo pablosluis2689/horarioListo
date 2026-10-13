@@ -486,7 +486,27 @@ function renderTareas(){
 }
 function borrarTarea(id){if(!confirm('¿Eliminar tarea?'))return;const data=getData();data.tareas=data.tareas.filter(t=>t.id!==id);save();}
 function marcarHecha(id){const data=getData();const t=data.tareas.find(x=>x.id===id);if(t)t.estado='hecha';save();}
-function notificar(titulo,cuerpo){if(Notification.permission!=='granted')return; new Notification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/167/167707.png'}); if(navigator.vibrate)navigator.vibrate([200,100,200]);}
+
+function notificar(titulo,cuerpo){
+  // sonido y vibración aunque esté abierta
+  try{ new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a650f4.mp3').play().catch(()=>{}); }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([400,100,400]);
+
+  if(Notification.permission==='granted' && 'serviceWorker' in navigator){
+    navigator.serviceWorker.ready.then(reg=>{
+      reg.showNotification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true});
+    });
+  }
+}
+
+// sonido y vibración version vieja no suena
+//function notificar(titulo,cuerpo){
+//  if(Notification.permission!=='granted')return; new Notification(titulo,
+  {body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/167/167707.png'}); 
+//  if(navigator.vibrate)navigator.vibrate([200,100,200]);
+//}
+
+
 function checkAlarmas(){
   const data=getData(); const ahora=new Date(); const hhmm=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0'); const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado']; const hoy=diaMap[ahora.getDay()];
   if(data.config.horaMochila===hhmm){
