@@ -1,4 +1,4 @@
-const CACHE='mochila-v7'; // v7 para obligar a actualizar el v6
+const CACHE='mochila-v8';
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
@@ -10,9 +10,8 @@ self.addEventListener('fetch',e=>{
   e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))
 });
 
-// --- LOGICA AGRUPADA EN REPOSO ---
 let datosHijos = [];
-let notificados = {}; // para no repetir
+let notificados = {};
 
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SYNC_HIJOS') {

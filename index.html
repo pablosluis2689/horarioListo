@@ -622,16 +622,19 @@ function renderAll(){
 }
 
 function syncToSW(){
-  if(!navigator.serviceWorker.controller) return;
   try{
     const hijosParaSW = app.hijos.map(h=>{
       const raw=localStorage.getItem('mochila_'+h.id);
       const d=raw?JSON.parse(raw):{};
       return {nombre:h.nombre, id:h.id, config:d.config||{}, extras:d.extras||[], tareas:d.tareas||[], horario:d.horario||{}, materias:d.materias||[]};
     });
-    navigator.serviceWorker.controller.postMessage({type:'SYNC_HIJOS', hijos:hijosParaSW});
-    console.log('SW sync OK', hijosParaSW.length);
-  }catch(e){ console.log('SW sync fallo',e); }
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.ready.then(reg=>{
+        const sw = reg.active || reg.waiting || reg.installing;
+        if(sw) sw.postMessage({type:'SYNC_HIJOS', hijos:hijosParaSW});
+      });
+    }
+  }catch(e){}
 }
 
 if(Notification.permission!=='granted' && Notification.permission!=='denied'){setTimeout(()=>{if(confirm('¿Activar notificaciones para la mochila?'))pedirPermiso();},2500);}
@@ -639,6 +642,7 @@ renderAll(); renderDiasChecks();
 setInterval(syncToSW, 60000);
 if('serviceWorker' in navigator){
   navigator.serviceWorker.ready.then(()=>{setTimeout(syncToSW,2000);});
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{setTimeout(syncToSW,500);});
 }
 </script>
 <!-- PWA PRO - HACE QUE SEA APP INSTALABLE -->
