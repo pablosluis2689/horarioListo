@@ -626,12 +626,12 @@ function syncToSW(){
     const hijosParaSW = app.hijos.map(h=>{
       const raw=localStorage.getItem('mochila_'+h.id);
       const d=raw?JSON.parse(raw):{};
-      return {nombre:h.nombre, id:h.id, config:d.config||{}, extras:d.extras||[], tareas:d.tareas||[], horario:d.horario||{}, materias:d.materias||[]};
+      return {nombre:h.nombre,id:h.id,config:d.config||{},extras:d.extras||[],tareas:d.tareas||[],horario:d.horario||{},materias:d.materias||[]};
     });
     if('serviceWorker' in navigator){
       navigator.serviceWorker.ready.then(reg=>{
-        const sw = reg.active || reg.waiting || reg.installing;
-        if(sw) sw.postMessage({type:'SYNC_HIJOS', hijos:hijosParaSW});
+        const sw = reg.active || reg.waiting || reg.installing || navigator.serviceWorker.controller;
+        if(sw) sw.postMessage({type:'SYNC_HIJOS',hijos:hijosParaSW});
       });
     }
   }catch(e){}

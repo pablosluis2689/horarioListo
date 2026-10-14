@@ -1,99 +1,40 @@
-const CACHE='mochila-v8';
+const CACHE='mochila-v9';
+self.addEventListener('install',e=>{self.skipWaiting();});
+self.addEventListener('activate',e=>{clients.claim();});
+self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))});
 
-self.addEventListener('install',e=>{
-  self.skipWaiting();
-});
-self.addEventListener('activate',e=>{
-  self.clients.claim();
-});
-self.addEventListener('fetch',e=>{
-  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))
-});
+let datosHijos=[];
+let notificados={};
 
-let datosHijos = [];
-let notificados = {};
-
-self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SYNC_HIJOS') {
-    datosHijos = e.data.hijos;
-  }
+self.addEventListener('message',e=>{
+  if(e.data?.type==='SYNC_HIJOS'){datosHijos=e.data.hijos;}
 });
 
-function getHoraActual(){ const a=new Date(); return a.getHours().toString().padStart(2,'0')+':'+a.getMinutes().toString().padStart(2,'0'); }
-function getFechaHoy(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0'); }
-function restarMinutos(horaStr,min){
-  if(!horaStr) return null;
-  const [h,m]=horaStr.split(':').map(Number);
-  let t=h*60+m-min; if(t<0)t+=1440;
-  return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
-}
-function getMateriasTexto(dataHijo, diaManana){
-  try{
-    const mats=dataHijo.horario[diaManana]||[];
-    return mats.map(mm=>{
-      const mat=dataHijo.materias?.find(x=>x.id===mm.materiaId);
-      return mat?mat.nombre:'';
-    }).filter(Boolean).join(', ')||'Sin materias';
-  }catch{return 'Revisar mochila';}
-}
+function getHora(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function getFecha(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function restar(h,m){if(!h)return null;const [hh,mm]=h.split(':').map(Number);let t=hh*60+mm-m;if(t<0)t+=1440;return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+function matsTexto(dh,dia){try{return (dh.horario[dia]||[]).map(x=>{const mat=dh.materias?.find(z=>z.id===x.materiaId);return mat?.nombre||''}).filter(Boolean).join(', ')||'Sin materias'}catch{return 'Revisar mochila'}}
 
-function checkAlarmasSW(){
+function check(){
   if(!datosHijos.length) return;
-  const horaAhora=getHoraActual();
-  const fechaHoy=getFechaHoy();
-  const ahora=new Date();
-  const diaMap=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-  const hoy=diaMap[ahora.getDay()];
-  const manana=diaMap[(ahora.getDay()+1)%7];
+  const ha=getHora(); const fh=getFecha();
+  const ahora=new Date(); const map=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const hoy=map[ahora.getDay()]; const man=map[(ahora.getDay()+1)%7];
   const grupos={};
-
-  datosHijos.forEach((dataHijo)=>{
-    const hijoNombre=dataHijo.nombre||'Hijo';
-    if(dataHijo.config?.horaMochila===horaAhora){
-      const k='mochila_'+horaAhora;
-      if(!grupos[k]) grupos[k]=[];
-      grupos[k].push({tipo:'mochila',hijoNombre,detalle:getMateriasTexto(dataHijo,manana)});
-    }
-    dataHijo.extras?.forEach(ex=>{
-      if(!ex.dias?.includes(hoy)) return;
-      const aviso=restarMinutos(ex.horaInicio, ex.anticipacionMinutos||30);
-      if(aviso===horaAhora){
-        const k='extra_'+horaAhora;
-        if(!grupos[k]) grupos[k]=[];
-        grupos[k].push({tipo:'extra',hijoNombre,detalle:ex.nombre+' a las '+ex.horaInicio+' - Llevar: '+(ex.nota||'')});
-      }
-    });
-    dataHijo.tareas?.forEach(t=>{
-      if(t.fechaAviso===fechaHoy && t.horaAviso===horaAhora){
-        const k='tarea_'+horaAhora;
-        if(!grupos[k]) grupos[k]=[];
-        grupos[k].push({tipo:'tarea',hijoNombre,detalle:(t.materia||'')+' '+(t.titulo||'')});
-      }
-    });
+  datosHijos.forEach(dh=>{
+    const nom=dh.nombre||'Hijo';
+    if(dh.config?.horaMochila===ha){const k='mochila_'+ha;if(!grupos[k])grupos[k]=[];grupos[k].push({t:'mochila',nom,det:matsTexto(dh,man)})}
+    dh.extras?.forEach(ex=>{if(!ex.dias?.includes(hoy))return;if(restar(ex.horaInicio,ex.anticipacionMinutos||30)===ha){const k='extra_'+ha;if(!grupos[k])grupos[k]=[];grupos[k].push({t:'extra',nom,det:ex.nombre+' '+ex.horaInicio})}});
+    dh.tareas?.forEach(ta=>{if(ta.fechaAviso===fh&&ta.horaAviso===ha){const k='tarea_'+ha;if(!grupos[k])grupos[k]=[];grupos[k].push({t:'tarea',nom,det:ta.materia+' '+ta.titulo})}});
   });
-
-  Object.keys(grupos).forEach(llave=>{
-    const items=grupos[llave];
-    const storageKey='notificado_grupo_'+llave+'_'+fechaHoy+'_'+horaAhora;
-    if(notificados[storageKey]) return;
-    let titulo,cuerpo;
-    if(items.length===1){
-      const it=items[0];
-      titulo=it.tipo==='mochila'?`🎒 Mochila de ${it.hijoNombre}`:it.tipo==='extra'?`⚽ ${it.hijoNombre}`:`📚 Tarea de ${it.hijoNombre}`;
-      cuerpo=it.detalle;
-    }else{
-      titulo=items[0].tipo==='mochila'?`🎒 Mochila ${llave.split('_')[1]} - ${items.length} hijos`:`⚽ Extras ${llave.split('_')[1]} - ${items.length} hijos`;
-      cuerpo=items.map(i=>`• ${i.hijoNombre}: ${i.detalle}`).join('\n');
-    }
-    self.registration.showNotification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',badge:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true,vibrate:[400,100,400]});
-    notificados[storageKey]=1;
+  Object.keys(grupos).forEach(k=>{
+    const its=grupos[k]; const sk='g_'+k+'_'+fh+'_'+ha; if(notificados[sk])return;
+    let tit,cuer;
+    if(its.length===1){const it=its[0];tit=it.t==='mochila'?`🎒 Mochila de ${it.nom}`:it.t==='extra'?`⚽ ${it.nom}`:`📚 ${it.nom}`;cuer=it.det}
+    else{tit=`🎒 ${k.split('_')[1]} - ${its.length} hijos`;cuer=its.map(i=>`• ${i.nom}: ${i.det}`).join('\n')}
+    self.registration.showNotification(tit,{body:cuer,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',badge:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true,vibrate:[400,100,400],tag:k});
+    notificados[sk]=1;
   });
 }
-
-setInterval(checkAlarmasSW, 30000);
-checkAlarmasSW();
-
-self.addEventListener('notificationclick',e=>{
-  e.notification.close();
-  e.waitUntil(clients.openWindow('./index.html'));
-});
+setInterval(check,30000); check();
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.openWindow('./'))});
