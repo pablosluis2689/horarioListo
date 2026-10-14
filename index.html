@@ -7,13 +7,10 @@
 <meta name="theme-color" content="#6366F1">
 
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3456/3456426.png">
+<link rel="apple-touch-icon" href="./icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mochila Lista">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F4F6FB;
@@ -302,6 +299,7 @@ body{
   <div class="card" style="margin-bottom:12px">
     <div class="card-title"><span class="dot"></span> Alarmas</div>
     <button class="btn btn-ghost btn-full" onclick="pedirPermiso()">🔔 Activar notificaciones</button>
+    <div class="nota">Los navegadores pueden suspender recordatorios si la PWA permanece cerrada; ábrela con regularidad para sincronizar las alarmas.</div>
     <div class="btn-row" style="margin-top:12px">
       <button class="btn btn-sm btn-ghost" style="flex:1" onclick="simularAlarmaMochila()">Probar mochila</button>
       <button class="btn btn-sm btn-ghost" style="flex:1" onclick="simularAlarmaExtra()">Probar extra</button>
@@ -325,34 +323,53 @@ const DIAS_LABEL={lunes:'Lun',martes:'Mar',miercoles:'Mié',jueves:'Jue',viernes
 const DIAS_FULL={lunes:'Lunes',martes:'Martes',miercoles:'Miércoles',jueves:'Jueves',viernes:'Viernes',sabado:'Sábado',domingo:'Domingo'};
 const SUGERENCIAS=['Matemática','Lengua','Ciencias','Sociales','Inglés','Ed. Física','Arte','Música','Formación','Computación','Proyecto','Deporte','Tecnología'];
 let ultimoColor='#6366F1';
+const APP_STORAGE_KEY='mochila_final_v3';
+let app=null;
+let pendingCorruptStorage=null;
+let lastPersistedApp=null;
+let storageReadFailed=false;
 function crearDataVacia(){return {materias:[],horario:{lunes:[],martes:[],miercoles:[],jueves:[],viernes:[]},extras:[],tareas:[],config:{horaMochila:'19:00'}};}
 
-//cambio de usuario pre creado
-let app=null;
-try{
-  app=JSON.parse(localStorage.getItem('mochila_final_v3')||'null');
-  if(!app){
-    let old=JSON.parse(localStorage.getItem('mochila_final_v2')||'null');
-    if(!old) old=JSON.parse(localStorage.getItem('mochila_multi_v1')||'null');
-    if(!old) old=JSON.parse(localStorage.getItem('mochila_v4')||'null');
-    if(old && old.hijos){app=old;}
-    else if(old && old.materias){app={hijos:[{id:Date.now(),nombre:'Hijo 1',data:old}],activo:0};}
-    else{app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};}
+function normalizarApp(candidate){
+  let normalized=candidate;
+  if(!normalized || typeof normalized!=='object') throw new Error('El formato de datos no es válido.');
+  if(!Array.isArray(normalized.hijos) && Array.isArray(normalized.materias)){
+    normalized={hijos:[{id:Date.now(),nombre:'Hijo 1',data:normalized}],activo:0};
   }
-}catch(e){
-  app={hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0};
-  try{localStorage.clear();}catch(e2){}
+  if(!Array.isArray(normalized.hijos)) throw new Error('No se encontró una lista válida de hijos.');
+  if(!normalized.hijos.length) normalized.hijos=[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}];
+  normalized.hijos.forEach(function(h){
+    if(!h || typeof h!=='object') throw new Error('Hay un perfil de hijo inválido.');
+    if(!h.data || typeof h.data!=='object') h.data=crearDataVacia();
+    if(!h.data.horario || typeof h.data.horario!=='object') h.data.horario=crearDataVacia().horario;
+    if(!h.data.config || typeof h.data.config!=='object') h.data.config={horaMochila:'19:00'};
+    if(!Array.isArray(h.data.materias)) h.data.materias=[];
+    if(!Array.isArray(h.data.extras)) h.data.extras=[];
+    if(!Array.isArray(h.data.tareas)) h.data.tareas=[];
+    h.nombre=String(h.nombre||'Hijo');
+    if(h.id==null) h.id=Date.now()+Math.random();
+    ['lunes','martes','miercoles','jueves','viernes'].forEach(function(d){if(!Array.isArray(h.data.horario[d]))h.data.horario[d]=[];});
+  });
+  if(!Number.isInteger(normalized.activo) || normalized.activo<0 || normalized.activo>=normalized.hijos.length) normalized.activo=0;
+  return normalized;
 }
-if(!app.hijos ||!app.hijos.length){app.hijos=[{id:Date.now(),nombre:'Luis',data:crearDataVacia()}];}
-if(app.activo==null || app.activo>=app.hijos.length){app.activo=0;}
-app.hijos.forEach(function(h){
-  if(!h.data) h.data=crearDataVacia();
-  if(!h.data.horario) h.data.horario=crearDataVacia().horario;
-  if(!h.data.config) h.data.config={horaMochila:'19:00'};
-  if(!h.data.materias) h.data.materias=[];
-  if(!h.data.extras) h.data.extras=[];
-  if(!h.data.tareas) h.data.tareas=[];
-});
+const STORAGE_KEYS=[APP_STORAGE_KEY,'mochila_final_v2','mochila_multi_v1','mochila_v4'];
+for(const key of STORAGE_KEYS){
+  let raw;
+  try{raw=localStorage.getItem(key);}catch(error){storageReadFailed=true;console.error('No se pudo leer el almacenamiento local.',error);break;}
+  if(raw===null)continue;
+  try{
+    app=normalizarApp(JSON.parse(raw));
+    break;
+  }catch(error){
+    console.error('No se pudieron recuperar los datos de '+key+'.',error);
+    if(!pendingCorruptStorage)pendingCorruptStorage={key:key,raw:raw,backupSaved:false};
+  }
+}
+if(!app)app=normalizarApp({hijos:[{id:Date.now(),nombre:'Sofía',data:crearDataVacia()}],activo:0});
+lastPersistedApp=JSON.stringify(app);
+if(storageReadFailed)setTimeout(()=>alert('El navegador no permitió leer el almacenamiento. Los datos existentes no se han borrado; habilita el almacenamiento para poder guardar cambios.'),0);
+else if(pendingCorruptStorage)setTimeout(()=>alert('Se encontró un respaldo dañado. No se borró; antes de guardar cambios se conservará una copia del contenido dañado.'),0);
 function getData(){
   try{
     if(!app.hijos[app.activo]) app.activo=0;
@@ -364,15 +381,26 @@ function getData(){
 }
 function save(){
   try{
-    localStorage.setItem('mochila_final_v3',JSON.stringify(app));
-    localStorage.setItem('mochila_final_v2',JSON.stringify(app));
-    localStorage.setItem('mochila_multi_v1',JSON.stringify(app));
-  }catch(e){}
-  try{ renderAll(); }catch(e){}
+    if(pendingCorruptStorage && !pendingCorruptStorage.backupSaved){
+      const backupKey='mochila_backup_corrupta_'+Date.now();
+      localStorage.setItem(backupKey,pendingCorruptStorage.raw);
+      pendingCorruptStorage.backupSaved=true;
+    }
+    const serialized=JSON.stringify(app);
+    localStorage.setItem(APP_STORAGE_KEY,serialized);
+    lastPersistedApp=serialized;
+    pendingCorruptStorage=null;
+  }catch(error){
+    console.error('No se pudieron guardar los datos.',error);
+    if(lastPersistedApp)app=normalizarApp(JSON.parse(lastPersistedApp));
+    alert('No se pudieron guardar los cambios. Revisa el espacio disponible y los permisos de almacenamiento del navegador.');
+    renderAll();
+    return false;
+  }
+  renderAll();
+  syncToSW();
+  return true;
 }
-
-//fin de usuario pre creado
-
 
 function uid(){return Math.random().toString(36).slice(2,9);}
 function getDiaSemanaHoy(){const mapa=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];return mapa[new Date().getDay()];}
@@ -523,96 +551,92 @@ function renderTareas(){
 function borrarTarea(id){if(!confirm('¿Eliminar tarea?'))return;const data=getData();data.tareas=data.tareas.filter(t=>t.id!==id);save();}
 function marcarHecha(id){const data=getData();const t=data.tareas.find(x=>x.id===id);if(t)t.estado='hecha';save();}
 
-function getHoraActual(){const a=new Date();return a.getHours().toString().padStart(2,'0')+':'+a.getMinutes().toString().padStart(2,'0');}
-function getFechaHoy(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');}
-function restarMinutos(horaStr,minutos){if(!horaStr)return null;const parts=horaStr.split(':');let h=parseInt(parts[0]);let m=parseInt(parts[1]);let total=h*60+m-minutos;if(total<0)total+=1440;let nh=Math.floor(total/60);let nm=total%60;let sNh=nh.toString();if(sNh.length<2)sNh='0'+sNh;let sNm=nm.toString();if(sNm.length<2)sNm='0'+sNm;return sNh+':'+sNm;}
-function getMateriasMananaTexto(dataHijo, diaManana){try{if(!dataHijo||!dataHijo.horario)return 'Revisar mochila';const materias=dataHijo.horario[diaManana]||[];let lista=[];for(let mm of materias){let mat=null;if(dataHijo.materias){for(let x of dataHijo.materias){if(x.id===mm.materiaId){mat=x;break;}}}if(mat)lista.push(mat.nombre);}return lista.join(', ')||'Sin materias';}catch(e){return 'Revisar mochila';}}
-function notificar(titulo,cuerpo,clickHijoIndex){
-  try{ new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a650f4.mp3').play().catch(function(){}); }catch(e){}
-  if(navigator.vibrate) navigator.vibrate([400,100,400]);
-  if(Notification.permission==='granted' && 'serviceWorker' in navigator){
-    navigator.serviceWorker.ready.then(function(reg){reg.showNotification(titulo,{body:cuerpo,icon:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',badge:'https://cdn-icons-png.flaticon.com/512/3456/3456426.png',requireInteraction:true,tag:titulo+Date.now()});});
-  }
+async function pedirPermiso(){
+  if(!('Notification' in window)){alert('Este navegador no admite notificaciones.');return;}
+  try{
+    const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;
+    if(permission!=='granted'){alert('Las notificaciones no están habilitadas. Puedes permitirlas desde los ajustes del navegador.');return;}
+    await syncToSW();
+    alert('Notificaciones activadas.');
+  }catch(error){console.error('No se pudo activar las notificaciones.',error);alert('No se pudieron activar las notificaciones.');}
 }
-function checkAlarmas(){
-  if(!app ||!app.hijos ||!app.hijos.length) return;
-  const horaAhora = getHoraActual();
-  const fechaHoy = getFechaHoy();
-  const ahora = new Date();
-  const diaMap = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-  const hoy = diaMap[ahora.getDay()];
-  const manana = diaMap[(ahora.getDay()+1)%7];
-  const grupos = {};
-  for(let idx=0; idx<app.hijos.length; idx++){
-    let hijo=app.hijos[idx];
-    let dataHijo=null;
-    try{let raw=localStorage.getItem('mochila_'+hijo.id); dataHijo=raw? JSON.parse(raw):null;}catch(e){dataHijo=null;}
-    if(!dataHijo) continue;
-    if(!dataHijo.config) dataHijo.config={};
-    if(dataHijo.config.horaMochila && dataHijo.config.horaMochila===horaAhora){
-      let llave='mochila_'+horaAhora;
-      if(!grupos[llave]) grupos[llave]=[];
-      grupos[llave].push({tipo:'mochila',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:getMateriasMananaTexto(dataHijo,manana)});
-    }
-    if(dataHijo.extras){
-      for(let ex of dataHijo.extras){
-        if(!ex.dias || ex.dias.indexOf(hoy)===-1) continue;
-        if(!ex.horaInicio) continue;
-        let aviso=restarMinutos(ex.horaInicio, ex.anticipacionMinutos||30);
-        if(aviso===horaAhora){
-          let llave='extra_'+horaAhora;
-          if(!grupos[llave]) grupos[llave]=[];
-          grupos[llave].push({tipo:'extra',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:(ex.nombre||'Actividad')+' a las '+ex.horaInicio+' - Llevar: '+(ex.nota||'')});
-        }
-      }
-    }
-    if(dataHijo.tareas){
-      for(let t of dataHijo.tareas){
-        if(t.fechaAviso===fechaHoy && t.horaAviso===horaAhora){
-          let llave='tarea_'+horaAhora;
-          if(!grupos[llave]) grupos[llave]=[];
-          grupos[llave].push({tipo:'tarea',hijoNombre:hijo.nombre,hijoIndex:idx,detalle:(t.materia||'')+' '+(t.titulo||'')});
-        }
-      }
-    }
+async function mostrarNotificacion(titulo,cuerpo,tag){
+  if(!('Notification' in window) || Notification.permission!=='granted'){
+    alert('Activa las notificaciones desde Ajustes antes de probar una alarma.');
+    return;
   }
-  let llaves=Object.keys(grupos);
-  for(let k=0;k<llaves.length;k++){
-    let llave=llaves[k];
-    let items=grupos[llave];
-    if(!items||!items.length) continue;
-    let storageKey='notificado_grupo_'+llave+'_'+fechaHoy+'_'+horaAhora;
-    if(localStorage.getItem(storageKey)) continue;
-    if(items.length===1){
-      let it=items[0];
-      if(it.tipo==='mochila') notificar('🎒 Mochila de '+it.hijoNombre, 'Mañana ('+manana+'): '+(it.detalle||'nada')+'. ¡Arma la mochila!', it.hijoIndex);
-      else if(it.tipo==='extra') notificar('⚽ '+it.hijoNombre, it.detalle, it.hijoIndex);
-      else notificar('📚 Tarea de '+it.hijoNombre, it.detalle, it.hijoIndex);
+  try{
+    if('serviceWorker' in navigator){
+      const registration=await navigator.serviceWorker.ready;
+      await registration.showNotification(titulo,{body:cuerpo,icon:'./icon.svg',badge:'./icon.svg',tag:tag});
     }else{
-      let hora=llave.split('_')[1];
-      let titulo='', cuerpo='';
-      if(items[0].tipo==='mochila'){
-        titulo='🎒 Mochila '+hora+' - '+items.length+' hijos';
-        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+' mañana: '+i.detalle);} cuerpo=partes.join('\n');
-      }else if(items[0].tipo==='extra'){
-        titulo='⚽ Extras '+hora+' - '+items.length+' hijos';
-        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+': '+i.detalle);} cuerpo=partes.join('\n');
-      }else{
-        titulo='📚 Tareas '+hora;
-        let partes=[]; for(let i of items){partes.push('• '+i.hijoNombre+': '+i.detalle);} cuerpo=partes.join('\n');
-      }
-      notificar(titulo, cuerpo, items[0].hijoIndex);
+      new Notification(titulo,{body:cuerpo,icon:'./icon.svg',tag:tag});
     }
-    localStorage.setItem(storageKey,'1');
+  }catch(error){console.error('No se pudo mostrar la notificación.',error);alert('No se pudo mostrar la notificación.');}
+}
+function simularAlarmaMochila(){
+  const data=getData();
+  const manana=getDiaSemanaManana();
+  const materias=(data.horario[manana]||[]).map(item=>{
+    const materia=data.materias.find(m=>m.id===item.materiaId);
+    return materia?materia.nombre:'';
+  }).filter(Boolean);
+  mostrarNotificacion('🎒 Prueba de alarma de mochila',materias.length?'Mañana: '+materias.join(', '):'No hay materias programadas para mañana.','prueba-mochila-'+Date.now());
+}
+function simularAlarmaExtra(){
+  const extras=getData().extras;
+  const extra=extras.find(item=>(item.dias||[]).includes(getDiaSemanaHoy()));
+  mostrarNotificacion('⚽ Prueba de alarma de actividad',extra?extra.nombre+' a las '+extra.horaInicio+(extra.nota?' · Llevar: '+extra.nota:''):'Alarma de actividad de prueba.','prueba-extra-'+Date.now());
+}
+function borrarTodoHijo(){
+  const hijo=app.hijos[app.activo];
+  if(!hijo || !confirm('¿Borrar todos los datos de '+hijo.nombre+'? Esta acción no se puede deshacer.'))return;
+  hijo.data=crearDataVacia();
+  save();
+}
+async function exportarDatos(){
+  try{
+    const fileName='mochila-lista-respaldo-'+getFechaHoy()+'.json';
+    const blob=new Blob([JSON.stringify({format:'mochila-lista',version:1,app:app},null,2)],{type:'application/json'});
+    if(typeof File==='function' && navigator.canShare && navigator.share){
+      const file=new File([blob],fileName,{type:'application/json'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:'Respaldo de Mochila Lista'});
+        return;
+      }
+    }
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(error){
+    if(error.name==='AbortError')return;
+    console.error('No se pudieron exportar los datos.',error);
+    alert('No se pudo crear el archivo de respaldo.');
   }
 }
-setInterval(checkAlarmas,30000);
-
-
-//function renderAll(){
-  //renderHijos(); const data=getData(); document.getElementById('horaMochila').value=data.config.horaMochila;
-  //renderHero(); renderChecklist(); renderProximasTareas(); renderExtrasHoy(); renderDias(); renderExtras(); renderTareas(); renderSelectMaterias(); renderCalendarioSimple();
-//}
+async function importarDatos(event){
+  const input=event.target;
+  const file=input.files && input.files[0];
+  if(!file)return;
+  try{
+    const parsed=JSON.parse(await file.text());
+    const candidate=parsed && parsed.format==='mochila-lista'?parsed.app:parsed;
+    const imported=normalizarApp(candidate);
+    if(!confirm('La importación reemplazará los datos actuales. ¿Continuar?'))return;
+    const previous=app;
+    app=imported;
+    if(!save())app=previous;
+    else closeSheet('sheetSettings');
+    renderAll();
+  }catch(error){console.error('No se pudieron importar los datos.',error);alert('El archivo no contiene un respaldo válido de Mochila Lista.');}
+  finally{input.value='';}
+}
+function getFechaHoy(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');}
 
 function renderAll(){
   try{
@@ -622,27 +646,18 @@ function renderAll(){
 }
 
 function syncToSW(){
-  try{
-    const hijosParaSW = app.hijos.map(h=>{
-      const raw=localStorage.getItem('mochila_'+h.id);
-      const d=raw?JSON.parse(raw):{};
-      return {nombre:h.nombre,id:h.id,config:d.config||{},extras:d.extras||[],tareas:d.tareas||[],horario:d.horario||{},materias:d.materias||[]};
-    });
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.ready.then(reg=>{
-        const sw = reg.active || reg.waiting || reg.installing || navigator.serviceWorker.controller;
-        if(sw) sw.postMessage({type:'SYNC_HIJOS',hijos:hijosParaSW});
-      });
-    }
-  }catch(e){}
+  if(!('serviceWorker' in navigator))return Promise.resolve();
+  return navigator.serviceWorker.ready.then(registration=>{
+    const worker=registration.active||registration.waiting||registration.installing;
+    if(worker)worker.postMessage({type:'SYNC_HIJOS',hijos:app.hijos});
+  }).catch(error=>{console.error('No se pudieron sincronizar los datos de alarmas.',error);});
 }
 
-if(Notification.permission!=='granted' && Notification.permission!=='denied'){setTimeout(()=>{if(confirm('¿Activar notificaciones para la mochila?'))pedirPermiso();},2500);}
 renderAll(); renderDiasChecks();
-setInterval(syncToSW, 60000);
+syncToSW();
+setInterval(syncToSW, 30000);
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.ready.then(()=>{setTimeout(syncToSW,2000);});
-  navigator.serviceWorker.addEventListener('controllerchange', ()=>{setTimeout(syncToSW,500);});
+  navigator.serviceWorker.addEventListener('controllerchange',syncToSW);
 }
 </script>
 <!-- PWA PRO - HACE QUE SEA APP INSTALABLE -->
@@ -650,8 +665,8 @@ if('serviceWorker' in navigator){
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js')
-      .then(()=>console.log('SW registrado OK'))
-      .catch(()=>console.log('SW fallo'));
+      .then(()=>syncToSW())
+      .catch(error=>{console.error('No se pudo registrar el service worker.',error);});
   });
 }
 let deferredPrompt;
