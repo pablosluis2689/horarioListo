@@ -685,6 +685,11 @@ function instalarPWA(){
     });
   }
 }
+window.addEventListener('appinstalled', () => {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+});
 </script>
 
 <div id="pwaBanner" style="display:none;position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:9999;background:#0F172A;color:white;padding:10px 16px;border-radius:999px;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.4);font-family:Inter,sans-serif;">
@@ -692,5 +697,6 @@ function instalarPWA(){
 <button onclick="instalarPWA()" style="background:#6366F1;color:white;border:none;padding:7px 12px;border-radius:999px;font-weight:700;font-size:12px">Instalar</button>
 <button onclick="this.parentElement.style.display='none'" style="background:transparent;border:none;color:#94A3B8;font-size:16px;margin-left:4px">✕</button>
 </div>
+
 </body>
 </html>
