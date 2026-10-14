@@ -17,7 +17,6 @@ function openDatabase(){
 }
 
 function saveChildren(children){
-  
   return openDatabase().then(db=>new Promise((resolve,reject)=>{
     const tx=db.transaction('state','readwrite');
     tx.objectStore('state').put({key:'children',value:children});
